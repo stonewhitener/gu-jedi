@@ -1,4 +1,4 @@
-# gu-jedi
+# Jedi
 I wanna be a Jedi Knight.
 
 
