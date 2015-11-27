@@ -11,7 +11,7 @@ $ git clone https://github.com/y-sira/gu-jedi.git
 ブランチを切って，
 
 ```bash
-$ git branch -b {BRANCH_NAME}
+$ git checkout -b {BRANCH_NAME}
 ```
 
 作業します．
