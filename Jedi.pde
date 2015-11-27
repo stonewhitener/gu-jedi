@@ -31,16 +31,16 @@ float[] end_y   = {0.0, 0.0};
 
 void setup() {
   // Set window size
-  size(1280, 480);
+  size(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-  // Wait for Kinect
+  // Wait for a Kinect
   while (true) {
     if (Kinect.countDevices() > 0) {
       break;
     }
   }
 
-  // Initialize Kinect
+  // Initialize the Kinect
   kinect = new Kinect(this);
   kinect.activateDevice(0);
   kinect.initDepth();
@@ -72,8 +72,9 @@ void draw() {
   }
   colorMode(RGB);
 
-  // create a instance to process images
+  // Create a OpenCV instance to process images
   OpenCV opencv = new OpenCV(this, backLessDepthImage);
+  // Find edges
   opencv.findCannyEdges(20, 75);
 
   /**
@@ -91,17 +92,19 @@ void draw() {
   image(backLessDepthImage, 960, 0, 320, 240);
   image(opencv.getOutput(), 960, 240, 320, 240);
 
-  strokeWeight(3);
 
   /**
    * Draw a line which has a maximum length 
    */
-  // Select the line which has a maximum length
   float maxDistance = 0;
   int indexMax = -1;
+  
+  // Select the line which has a maximum length
   for (int i = 0; i < lines.size(); i++) {
-    stroke(0, 255, 0);
-
+    // lines include angle in radians, measured in double precision
+    // so we can select out vertical and horizontal lines
+    // They also include "start" and "end" PVectors with the position
+    
     float length = sqrt(pow((lines.get(i).start.x - lines.get(i).end.x), 2) + pow((lines.get(i).start.y - lines.get(i).end.y), 2));
 
     if (maxDistance < length) {
@@ -121,11 +124,12 @@ void draw() {
   end_x[0] = CURRENT * lines.get(indexMax).end.x + PREVIOUS * end_x[1];
   end_y[0] = CURRENT * lines.get(indexMax).end.y + PREVIOUS * end_y[1];
 
-  // lines include angle in radians, measured in double precision
-  // so we can select out vertical and horizontal lines
-  // They also include "start" and "end" PVectors with the position
+  // Draw a line
+  stroke(0, 255, 0);
+  strokeWeight(3);
   line(start_x[0], start_y[0], end_x[0], end_y[0]);
-
+  
+  // Calculate line's radian
   float radian = atan((end_y[0] - start_y[0]) / (end_x[0] - start_x[0]));
   
   // Draw a lightsaber
@@ -138,7 +142,8 @@ void draw() {
   imageMode(CORNER);
   translate(- (start_x[0] + end_x[0]) / 2, - (start_y[0] + end_y[0]) / 2);
   popMatrix();
-
+  
+  // Shift line's position for low-pass filter
   start_x[1] = start_x[0];
   start_y[1] = start_y[0];
   end_x[1] = end_x[0];
