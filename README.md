@@ -1,5 +1,13 @@
 # gu-jedi
-I wanna be a Jedi Knight
+I wanna be a Jedi Knight.
+
+
+# Dependencies
+
+- [Processing](https://processing.org/)
+- [OpenKinect for Processing](https://github.com/shiffman/OpenKinect-for-Processing)
+- [OpenCV for Processing](https://github.com/atduskgreg/opencv-processing)
+
 
 # 開発の流れ
 ## こわくない「ぎっとはぶできょうどうかいはつ」
@@ -94,3 +102,30 @@ $ git rebase master
 - `master` ブランチではコードの変更を行わないこと．
 - `master` ブランチはできるだけ最新の状態に保つようにすること．
 - 簡単のため，いろいろ誤魔化して書いてます．
+
+
+# 開発環境の構築
+## 推奨環境
+開発に必要な OS は UNIX です．
+Mac を持っていない人は適当な Linux をインストールしてください．
+
+初心者には [\[お察しください\]ntu](https://www.ubuntulinux.jp/) がいいと思いますが，これから本格的にプログラミングをしていくであろう情報の学生には [Arch Linux](https://www.archlinux.org/) をおすすめします．
+
+UNIX を使って開発を行いたい人は [@y-sira](https://github.com/y-sira) に聞いてください．
+OS のインストールからプロジェクトの開発環境を整えるまでサポートします．
+
+
+## Windows（非推奨）
+実行はできないけど，コードを書くだけでもやりたい！という人は Windows でも大丈夫です．
+
+Processing は [ここ](https://processing.org/) からダウンロードできます．
+
+各種ライブラリは
+
+- [OpenKinect for Processing](https://github.com/shiffman/OpenKinect-for-Processing)
+- [OpenCV for Processing](https://github.com/atduskgreg/opencv-processing)
+
+からダウンロードして，ディレクトリ `Processing/liblaries` に配置してください．
+
+Git の導入は Cygwin から行えます．
+詳しくは [@526mapleleaf](https://github.com/526mapleleaf) に．
