@@ -14,8 +14,8 @@ final int IMAGE_HEIGHT  = 480;
 final int THREASHOLD = 140;
 
 // Coefficients of low-pass filter
-final float CURRENT = 0.4;
-final float PREVOUS = 0.6;
+final float CURRENT = 0.1;
+final float PREVIOUS = 0.9;
 
 
 // Variables for instances
@@ -53,13 +53,13 @@ void setup() {
 
 void draw() {
   background(0);
-  
+
   // Images
   PImage depthImage = kinect.getDepthImage();
   PImage videoImage = kinect.getVideoImage();
   PImage backLessDepthImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
   PImage jediImage = loadImage("background.jpg");
-  
+
   // Eliminate background
   colorMode(HSB);
   for (int i = 0; i < IMAGE_WIDTH; i++) {
@@ -100,9 +100,6 @@ void draw() {
   float maxDistance = 0;
   int indexMax = -1;
   for (int i = 0; i < lines.size(); i++) {
-    // lines include angle in radians, measured in double precision
-    // so we can select out vertical and horizontal lines
-    // They also include "start" and "end" PVectors with the position
     stroke(0, 255, 0);
 
     float length = sqrt(pow((lines.get(i).start.x - lines.get(i).end.x), 2) + pow((lines.get(i).start.y - lines.get(i).end.y), 2));
@@ -112,43 +109,32 @@ void draw() {
       indexMax = i;
     }
   }
-  
+
   // No lines found
   if (indexMax == -1) {
     return;
   }
 
-  float radian = atan(
-    (lines.get(indexMax).end.y - lines.get(indexMax).start.y) / (lines.get(indexMax).end.x - lines.get(indexMax).start.x)
-  );
-
   // Low-pass filter
-  start_x[0] = 0.4 * lines.get(indexMax).start.x + 0.6 * start_x[1];
-  start_y[0] = 0.4 * lines.get(indexMax).start.y + 0.6 * start_y[1];
-  end_x[0] = 0.4 * lines.get(indexMax).end.x + 0.6 * end_x[1];
-  end_y[0] = 0.4 * lines.get(indexMax).end.y + 0.6 * end_y[1];
+  start_x[0] = CURRENT * lines.get(indexMax).start.x + PREVIOUS * start_x[1];
+  start_y[0] = CURRENT * lines.get(indexMax).start.y + PREVIOUS * start_y[1];
+  end_x[0] = CURRENT * lines.get(indexMax).end.x + PREVIOUS * end_x[1];
+  end_y[0] = CURRENT * lines.get(indexMax).end.y + PREVIOUS * end_y[1];
 
-  // Cause of Hough-transform's calculation procedure
-  //if (radian > 0) {
-  //  start_x[0] = 0.4 * lines.get(indexOfMax).start.x + 0.6 * start_x[1];
-  //  start_y[0] = 0.4 * lines.get(indexOfMax).start.y + 0.6 * start_y[1];
-  //  end_x[0] = 0.4 * lines.get(indexOfMax).end.x + 0.6 * end_x[1];
-  //  end_y[0] = 0.4 * lines.get(indexOfMax).end.y + 0.6 * end_y[1];
-  //} else {
-  //  start_x[0] = 0.4 * lines.get(indexOfMax).end.x + 0.6 * end_x[1];
-  //  start_y[0] = 0.4 * lines.get(indexOfMax).end.y + 0.6 * end_y[1];
-  //  end_x[0] = 0.4 * lines.get(indexOfMax).start.x + 0.6 * start_x[1];
-  //  end_y[0] = 0.4 * lines.get(indexOfMax).start.y + 0.6 * start_y[1];
-  //}
-
+  // lines include angle in radians, measured in double precision
+  // so we can select out vertical and horizontal lines
+  // They also include "start" and "end" PVectors with the position
   line(start_x[0], start_y[0], end_x[0], end_y[0]);
 
-  PImage lightSaber = loadImage("saber_blue.png");
+  float radian = atan((end_y[0] - start_y[0]) / (end_x[0] - start_x[0]));
+  
+  // Draw a lightsaber
+  PImage lightSaber = loadImage("lightsaber_blue.png");
   pushMatrix();
   translate((start_x[0] + end_x[0]) / 2, (start_y[0] + end_y[0]) / 2);
-  rotate(radian+PI/2);
+  rotate(radian);
   imageMode(CENTER);
-  image(lightSaber, 0, 0, lightSaber.width * (lightSaber.height / maxDistance), maxDistance);
+  image(lightSaber, 0, 0, maxDistance, lightSaber.width * (lightSaber.height / maxDistance));
   imageMode(CORNER);
   translate(- (start_x[0] + end_x[0]) / 2, - (start_y[0] + end_y[0]) / 2);
   popMatrix();
@@ -157,17 +143,4 @@ void draw() {
   start_y[1] = start_y[0];
   end_x[1] = end_x[0];
   end_y[1] = end_y[0];
-
-  // Cause of Hough-transform's calculation procedure
-  //if (radian > 0) {
-  //  start_x[1] = start_x[0];
-  //  start_y[1] = start_y[0];
-  //  end_x[1] = end_x[0];
-  //  end_y[1] = end_y[0];
-  //} else {
-  //  start_x[1] = end_x[0];
-  //  start_y[1] = end_y[0];
-  //  end_x[1] = start_x[0];
-  //  end_y[1] = start_y[0];
-  //}
 }
