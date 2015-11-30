@@ -11,6 +11,7 @@ final int WINDOW_HEIGHT = 480;
 final int IMAGE_WIDTH   = 640;
 final int IMAGE_HEIGHT  = 480;
 
+
 // A threashold to eliminate background
 final int THREASHOLD = 140;
 
