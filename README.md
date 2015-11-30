@@ -8,7 +8,7 @@ I wanna be a Jedi Knight.
 - [Processing](https://processing.org/)
 - [OpenKinect for Processing](https://github.com/shiffman/OpenKinect-for-Processing)
 - [OpenCV for Processing](https://github.com/atduskgreg/opencv-processing)
-
+- [SimpleOpenNI](https://code.google.com/p/simple-openni/)
 
 
 # 開発環境の構築
