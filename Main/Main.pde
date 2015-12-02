@@ -13,6 +13,10 @@ final int IMAGE_HEIGHT = 480;
 // A threashold to eliminate background
 final int THREASHOLD = 180;
 
+// Max distance (= 2^13 - 1)
+// Reference: https://msdn.microsoft.com/en-us/library/hh973078.aspx
+final int MAX_DISTANCE = 8191;
+
 
 // Variables for instances
 SimpleOpenNI kinect;
@@ -49,6 +53,14 @@ void draw() {
 
   kinect.update();
 
+  PImage distanceImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
+  int depthMap[] = kinect.depthMap();
+  for (int j = 0; j < IMAGE_HEIGHT; j++) {
+    for (int i = 0; i < IMAGE_WIDTH; i++) {
+      int c = 255 - 255 * depthMap[j * IMAGE_WIDTH + i] / MAX_DISTANCE;
+      distanceImage.set(i, j, color(c, c, c));
+    }
+  }
 
   // Images
   PImage depthImage = kinect.depthImage();
@@ -126,4 +138,3 @@ void draw() {
   translate(-(line.start.x + line.end.x) / 2, -(line.start.y + line.end.y) / 2);
   popMatrix();
 }
-
