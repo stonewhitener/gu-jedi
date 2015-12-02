@@ -14,6 +14,7 @@ final int IMAGE_HEIGHT = 480;
 final int THREASHOLD = 180;
 
 
+
 // Variables for instances
 SimpleOpenNI kinect;
 LowPassFilter lowPassFilter;
