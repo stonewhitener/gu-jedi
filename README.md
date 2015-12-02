@@ -5,8 +5,7 @@ I wanna be a Jedi Knight.
 
 # Dependencies
 
-- [Processing](https://processing.org/)
-- [OpenKinect for Processing](https://github.com/shiffman/OpenKinect-for-Processing)
+- [Processing](https://processing.org/) 2.2.1
 - [OpenCV for Processing](https://github.com/atduskgreg/opencv-processing)
 - [SimpleOpenNI](https://code.google.com/p/simple-openni/)
 
