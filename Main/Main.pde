@@ -49,10 +49,11 @@ void draw() {
 
   kinect.update();
 
+
   // Images
   PImage depthImage = kinect.depthImage();
   PImage videoImage = kinect.rgbImage();
-  PImage backLessDepthImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
+  PImage backgroundLessDepthImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
   PImage jediImage = loadImage("background.jpg");
 
   // Eliminate background
@@ -60,24 +61,18 @@ void draw() {
   for (int j = 0; j < IMAGE_HEIGHT; j++) {
     for (int i = 0; i < IMAGE_WIDTH; i++) {
       if (brightness(depthImage.get(i, j)) > THREASHOLD) {
-        backLessDepthImage.set(i, j, depthImage.get(i, j));
+        backgroundLessDepthImage.set(i, j, depthImage.get(i, j));
         jediImage.set(i, j, videoImage.get(i, j));
       }
     }
   }
   colorMode(RGB);
-
-  // Create a OpenCV instance to process images
-  OpenCV opencv = new OpenCV(this, backLessDepthImage);
+  
+  // Create a OpenCV instance to detect edges
+  OpenCV opencv = new OpenCV(this, backgroundLessDepthImage);
 
   // Find edges
   opencv.findCannyEdges(20, 75);
-
-  /**
-   * Find lines with Hough line detection
-   * Arguments are: threshold, minLengthLength, maxLineGap
-   */
-  ArrayList<gab.opencv.Line> lines = opencv.findLines(100, 200, 20);
 
 
   // Main Display
@@ -86,8 +81,13 @@ void draw() {
   // Sub Display
   image(videoImage, 640, 0, 320, 240);
   image(depthImage, 640, 240, 320, 240);
-  image(backLessDepthImage, 960, 0, 320, 240);
+  image(backgroundLessDepthImage, 960, 0, 320, 240);
   image(opencv.getOutput(), 960, 240, 320, 240);
+
+
+  // Find lines with Hough line detection 
+  // Arguments are: threshold, minLengthLength, maxLineGap
+  ArrayList<gab.opencv.Line> lines = opencv.findLines(100, 200, 20);
 
 
   /**
