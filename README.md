@@ -11,26 +11,13 @@ I wanna be a Jedi Knight.
 
 
 # 開発環境の構築
-## 推奨環境
-開発に必要な OS は UNIX です．
-Mac を持っていない人は適当な Linux をインストールしてください．
-
-初心者には [\[お察しください\]ntu](https://www.ubuntulinux.jp/) がいいと思いますが，これから本格的にプログラミングをしていくであろう情報の学生には [Arch Linux](https://www.archlinux.org/) をおすすめします．
-
-UNIX を使って開発を行いたい人は [@y-sira](https://github.com/y-sira) に聞いてください．
-OS のインストールから開発環境を整えるまでサポートします．
-
-基本的には [これだけ](http://qiita.com/sira/items/1fca78d1185a4e5997d9) です．
-
-
-## Windows（非推奨）
-実行はできないけど，コードを書くだけでもやりたい！という人は Windows でも大丈夫です．
-
-Processing は [ここ](https://processing.org/) からダウンロードできます．
+## Windows
+Windows でも開発できるようになりました．
+Processing は [ここ](https://processing.org/) から 2.2.1 をダウンロードしてください．
 
 各種ライブラリは
 
-- [OpenKinect for Processing](https://github.com/shiffman/OpenKinect-for-Processing)
+- [SimpleOpenNI](https://code.google.com/p/simple-openni/)
 - [OpenCV for Processing](https://github.com/atduskgreg/opencv-processing)
 
 からダウンロードして，ディレクトリ `Processing/liblaries` に配置してください．
