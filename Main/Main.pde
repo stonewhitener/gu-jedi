@@ -3,21 +3,20 @@ import processing.video.*;
 import SimpleOpenNI.*;
 import gab.opencv.*;
 
-
 // Size
 final int WINDOW_WIDTH = 1280;
 final int WINDOW_HEIGHT = 480;
 final int IMAGE_WIDTH = 640;
 final int IMAGE_HEIGHT = 480;
+PVector jointPos3D = new PVector();
+PVector jointPos2D = new PVector();
 
 // A threashold to eliminate background
 final int THREASHOLD = 180;
 
-
 // Variables for instances
 SimpleOpenNI kinect;
 LowPassFilter lowPassFilter;
-
 
 void setup() {
   // Set window size
@@ -29,11 +28,12 @@ void setup() {
       break;
     }
   }
-
+  
   // Initialize the Kinect
   kinect = new SimpleOpenNI(this);
   kinect.enableDepth();
   kinect.enableRGB();
+  kinect.enableUser();
   kinect.setMirror(true);
   kinect.alternativeViewPointDepthToImage();
 
@@ -42,13 +42,11 @@ void setup() {
 
   // Set frame rate
   frameRate(30);
+  background(0);
 }
 
 void draw() {
-  background(0);
-
   kinect.update();
-
 
   // Images
   PImage depthImage = kinect.depthImage();
@@ -74,7 +72,6 @@ void draw() {
   // Find edges
   opencv.findCannyEdges(20, 75);
 
-
   // Main Display
   image(jediImage, 0, 0, 640, 480);
 
@@ -84,15 +81,11 @@ void draw() {
   image(backgroundLessDepthImage, 960, 0, 320, 240);
   image(opencv.getOutput(), 960, 240, 320, 240);
 
-
   // Find lines with Hough line detection 
   // Arguments are: threshold, minLengthLength, maxLineGap
   ArrayList<gab.opencv.Line> lines = opencv.findLines(100, 200, 20);
 
-
-  /**
-   * Draw a line which has a maximum length 
-   */
+  // Draw a line which has a maximum length 
   float maxDistance = 0;
   int indexMax = -1;
 
@@ -114,16 +107,71 @@ void draw() {
   // Low-pass filter
   Line line = lowPassFilter.getFiltered(lines.get(indexMax).start, lines.get(indexMax).end);
 
-  // Draw a lightsaber
-  PImage lightSaber = loadImage("lightsaber_blue.png");
-  pushMatrix();
-  translate((line.start.x + line.end.x) / 2, (line.start.y + line.end.y) / 2);
-  rotate(line.radian());
-  imageMode(CENTER);
-  lightSaber.resize((int) maxDistance, 0);
-  image(lightSaber, 0, 0);
-  imageMode(CORNER);
-  translate(-(line.start.x + line.end.x) / 2, -(line.start.y + line.end.y) / 2);
-  popMatrix();
+  // Get Joint Position And Convert 2D Positon
+  int[] userList = kinect.getUsers();
+  for(int i=0;i<userList.length;i++){
+    if(kinect.isTrackingSkeleton(userList[i])){
+      kinect.getJointPositionSkeleton(userList[i],SimpleOpenNI.SKEL_RIGHT_HAND,jointPos3D);
+      kinect.drawLimb(userList[i], SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
+      kinect.convertRealWorldToProjective(jointPos3D, jointPos2D);
+  
+      // Calculate Angle
+      float angle;
+      angle=atan2((line.end.y-line.start.y),(line.end.x-line.start.x));
+      angle=degrees(angle);
+  
+      // Draw a lightsaber
+      pushMatrix();
+      translate((line.start.x + line.end.x) / 2, (line.start.y + line.end.y) / 2);
+      rotate(line.radian());
+      imageMode(CENTER);
+      
+      //right up vector
+      if(jointPos2D.x<=line.start.x && jointPos2D.y>=line.start.y && angle<=0){
+        PImage lightSaber = loadImage("lightsaber_blue.png");
+        lightSaber.resize((int) maxDistance, 0);
+        image(lightSaber, 0, 0);
+      }
+      //right down vector
+      else if(jointPos2D.x<=line.start.x && jointPos2D.y<=line.start.y && angle>=0){
+        PImage lightSaber = loadImage("lightsaber_blue.png");
+        lightSaber.resize((int) maxDistance, 0);
+        image(lightSaber, 0, 0);
+      }
+      //left up vector
+      else if(jointPos2D.x>=line.start.x && jointPos2D.y>=line.start.y && angle>=0){
+        PImage lightSaber = loadImage("lightsaber_blue_rev.png");
+        lightSaber.resize((int) maxDistance, 0);
+        image(lightSaber, 0, 0);
+      }
+      //left down vector
+      else if(jointPos2D.x>=line.start.x && jointPos2D.y<=line.start.y && angle<=0){
+        PImage lightSaber = loadImage("lightsaber_blue_rev.png");
+        lightSaber.resize((int) maxDistance, 0);
+        image(lightSaber, 0, 0);
+      }
+      imageMode(CORNER);
+      translate(-(line.start.x + line.end.x) / 2, -(line.start.y + line.end.y) / 2);
+      popMatrix();
+    }
+  }
 }
 
+// SimpleOpenNI events
+void onNewUser(SimpleOpenNI curContext, int userId)
+{
+  println("onNewUser - userId: " + userId);
+  println("\tstart tracking skeleton");
+  
+  curContext.startTrackingSkeleton(userId);
+}
+
+void onLostUser(SimpleOpenNI curContext, int userId)
+{
+  println("onLostUser - userId: " + userId);
+}
+
+void onVisibleUser(SimpleOpenNI curContext, int userId)
+{
+  //println("onVisibleUser - userId: " + userId);
+}
