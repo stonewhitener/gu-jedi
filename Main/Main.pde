@@ -3,16 +3,12 @@ import processing.video.*;
 import SimpleOpenNI.*;
 import gab.opencv.*;
 
+
 // Size
 final int WINDOW_WIDTH = 1280;
 final int WINDOW_HEIGHT = 480;
 final int IMAGE_WIDTH = 640;
 final int IMAGE_HEIGHT = 480;
-PVector jointPos3D = new PVector();
-PVector jointPos2D = new PVector();
-
-// A threashold to eliminate background
-final int THREASHOLD = 180;
 
 // Max distance (= 2^13 - 1) 
 // Reference: https://msdn.microsoft.com/en-us/library/hh973078.aspx 
@@ -20,7 +16,8 @@ final int MAX_DISTANCE = 8191;
 
 // Variables for instances
 SimpleOpenNI kinect;
-LowPassFilter lowPassFilter;
+ParticleFilter particleFilter;
+
 
 void setup() {
   // Set window size
@@ -33,16 +30,16 @@ void setup() {
     }
   }
 
-  // Initialize the Kinect
+  // Initialize Kinect
   kinect = new SimpleOpenNI(this);
   kinect.enableDepth();
   kinect.enableRGB();
   kinect.enableUser();
   kinect.setMirror(true);
   kinect.alternativeViewPointDepthToImage();
-
-  // Initialize the low-pass filter
-  lowPassFilter = new LowPassFilter();
+  
+  // Initialize particle filter
+  particleFilter = new ParticleFilter(2000, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
 
   // Set frame rate
   frameRate(30);
@@ -65,26 +62,40 @@ void draw() {
   // Images
   PImage depthImage = kinect.depthImage();
   PImage videoImage = kinect.rgbImage();
-  PImage backgroundLessDepthImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
+  PImage backgroundLessImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
+  PImage pfImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
   PImage jediImage = loadImage("background.jpg");
 
-  // Eliminate background
-  colorMode(HSB);
-  for (int j = 0; j < IMAGE_HEIGHT; j++) {
-    for (int i = 0; i < IMAGE_WIDTH; i++) {
-      if (brightness(depthImage.get(i, j)) > THREASHOLD) {
-        backgroundLessDepthImage.set(i, j, depthImage.get(i, j));
-        jediImage.set(i, j, videoImage.get(i, j));
+  // backgroundLessImage create
+  int max_x = 0;
+  int min_x = IMAGE_WIDTH;
+  int max_y = 0;
+  int min_y = IMAGE_HEIGHT;
+  int[] userMap = kinect.userMap();
+  for (int y = 0; y < IMAGE_HEIGHT; y++) {
+    for (int x = 0; x < IMAGE_WIDTH; x++) {
+      int i = x + y * IMAGE_WIDTH;
+      if (userMap[i] > 0) {
+        backgroundLessImage.set(x, y, videoImage.get(x, y));
+        jediImage.set(x, y, videoImage.get(x, y));
+        
+        if (max_x < x) max_x = x;
+        if (min_x > x) min_x = x;
+        if (max_y < y) max_y = y;
+        if (min_y > y) min_y = y;
       }
     }
   }
-  colorMode(RGB);
 
-  // Create a OpenCV instance to detect edges
-  OpenCV opencv = new OpenCV(this, backgroundLessDepthImage);
+  // 
+  for (int y=0; y<IMAGE_HEIGHT; y++) {
+    for (int x=0; x<IMAGE_WIDTH; x++) {
+      if ((max_x > x) && (min_x < x) && (max_y > y) && (min_y < y)) {
+        pfImage.set(x, y, videoImage.get(x, y));
+      }
+    }
+  }
 
-  // Find edges
-  opencv.findCannyEdges(20, 75);
 
   // Main Display
   image(jediImage, 0, 0, 640, 480);
@@ -92,101 +103,13 @@ void draw() {
   // Sub Display
   image(videoImage, 640, 0, 320, 240);
   image(depthImage, 640, 240, 320, 240);
-  image(backgroundLessDepthImage, 960, 0, 320, 240);
-  image(opencv.getOutput(), 960, 240, 320, 240);
+  image(backgroundLessImage, 960, 0, 320, 240);
+  image(pfImage, 960, 240, 320, 240);
+  
 
-  // Find lines with Hough line detection 
-  // Arguments are: threshold, minLengthLength, maxLineGap
-  ArrayList<gab.opencv.Line> lines = opencv.findLines(100, 200, 20);
-
-  // Draw a line which has a maximum length 
-  float maxDistance = 0;
-  int indexMax = -1;
-
-  // Select the line which has a maximum length
-  for (int i = 0; i < lines.size (); i++) {
-    float distance = sqrt(pow((lines.get(i).start.x - lines.get(i).end.x), 2) + pow((lines.get(i).start.y - lines.get(i).end.y), 2));
-
-    if (maxDistance < distance) {
-      maxDistance = distance;
-      indexMax = i;
-    }
-  }
-
-  // No line found
-  if (indexMax == -1) {
-    return;
-  }
-
-  // Low-pass filter
-  Line line = lowPassFilter.getFiltered(lines.get(indexMax).start, lines.get(indexMax).end);
-
-  // Get Joint Position And Convert 2D Positon
-  int[] userList = kinect.getUsers();
-  for (int i=0; i<userList.length; i++) {
-    if (kinect.isTrackingSkeleton(userList[i])) {
-      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_RIGHT_HAND, jointPos3D);
-      kinect.drawLimb(userList[i], SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
-      kinect.convertRealWorldToProjective(jointPos3D, jointPos2D);
-
-      // Calculate Angle
-      float angle;
-      angle=atan2((line.end.y-line.start.y), (line.end.x-line.start.x));
-      angle=degrees(angle);
-
-      // Draw a lightsaber
-      pushMatrix();
-      translate((line.start.x + line.end.x) / 2, (line.start.y + line.end.y) / 2);
-      rotate(line.radian());
-      imageMode(CENTER);
-
-      //right up vector
-      if (jointPos2D.x<=line.start.x && jointPos2D.y>=line.start.y && angle<=0) {
-        PImage lightSaber = loadImage("lightsaber_blue.png");
-        lightSaber.resize((int) maxDistance, 0);
-        image(lightSaber, 0, 0);
-      }
-      //right down vector
-      else if (jointPos2D.x<=line.start.x && jointPos2D.y<=line.start.y && angle>=0) {
-        PImage lightSaber = loadImage("lightsaber_blue.png");
-        lightSaber.resize((int) maxDistance, 0);
-        image(lightSaber, 0, 0);
-      }
-      //left up vector
-      else if (jointPos2D.x>=line.start.x && jointPos2D.y>=line.start.y && angle>=0) {
-        PImage lightSaber = loadImage("lightsaber_blue_rev.png");
-        lightSaber.resize((int) maxDistance, 0);
-        image(lightSaber, 0, 0);
-      }
-      //left down vector
-      else if (jointPos2D.x>=line.start.x && jointPos2D.y<=line.start.y && angle<=0) {
-        PImage lightSaber = loadImage("lightsaber_blue_rev.png");
-        lightSaber.resize((int) maxDistance, 0);
-        image(lightSaber, 0, 0);
-      }
-      imageMode(CORNER);
-      translate(-(line.start.x + line.end.x) / 2, -(line.start.y + line.end.y) / 2);
-      popMatrix();
-    }
-  }
-}
-
-// SimpleOpenNI events
-void onNewUser(SimpleOpenNI curContext, int userId)
-{
-  println("onNewUser - userId: " + userId);
-  println("\tstart tracking skeleton");
-
-  curContext.startTrackingSkeleton(userId);
-}
-
-void onLostUser(SimpleOpenNI curContext, int userId)
-{
-  println("onLostUser - userId: " + userId);
-}
-
-void onVisibleUser(SimpleOpenNI curContext, int userId)
-{
-  //println("onVisibleUser - userId: " + userId);
+  // Update particles
+  particleFilter.update(backgroundLessImage);
+  particleFilter.drawParticles(color(255, 0, 0), 2);
+  particleFilter.drawRectangle(color(255, 0, 0), 2, 30, 30);
 }
 
