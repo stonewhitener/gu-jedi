@@ -5,19 +5,23 @@ abstract class AbstractParticleFilter {
   private Random random;
   private double variance;
   
+  private AbstractParticleFilter(int n, double variance) {
+    this.particles = new ArrayList<Particle>();
+    this.variance = variance;
+    this.random = new Random(System.currentTimeMillis());
+  }
+  
   /**
    * @param n number of particles
    * @param variance variance of gaussian random
    * @param initImage image for deciding initialize particles position
    */
   public AbstractParticleFilter(int n, double variance, PImage initImage) {
-    this.particles = new ArrayList<Particle>();
+    this(n, variance);
+    
     for (int i = 0; i < n; i++) {
       this.particles.add(new Particle(0, 0, 0.0));
     }
-    
-    this.variance = variance;
-    this.random = new Random(System.currentTimeMillis());
 
     init(initImage);
   }
@@ -29,13 +33,11 @@ abstract class AbstractParticleFilter {
    * @param y initial position of particles
    */
   public AbstractParticleFilter(int n, double variance, int x, int y) {
-    this.particles = new ArrayList<Particle>();
+    this(n, variance);
+    
     for (int i = 0; i < n; i++) {
       this.particles.add(new Particle(x, y, 0.0));
     }
-    
-    this.variance = variance;
-    this.random = new Random(System.currentTimeMillis());
   }
 
   // Implement this method
