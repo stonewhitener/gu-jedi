@@ -14,6 +14,10 @@ PVector jointPos2D = new PVector();
 // A threashold to eliminate background
 final int THREASHOLD = 180;
 
+// Max distance (= 2^13 - 1) 
+// Reference: https://msdn.microsoft.com/en-us/library/hh973078.aspx 
+final int MAX_DISTANCE = 8191; 
+
 // Variables for instances
 SimpleOpenNI kinect;
 LowPassFilter lowPassFilter;
@@ -28,7 +32,7 @@ void setup() {
       break;
     }
   }
-  
+
   // Initialize the Kinect
   kinect = new SimpleOpenNI(this);
   kinect.enableDepth();
@@ -48,6 +52,16 @@ void setup() {
 void draw() {
   kinect.update();
 
+  PImage distanceImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB); 
+  int depthMap[] = kinect.depthMap(); 
+  for (int j = 0; j < IMAGE_HEIGHT; j++) { 
+    for (int i = 0; i < IMAGE_WIDTH; i++) { 
+      int c = 255 - 255 * depthMap[j * IMAGE_WIDTH + i] / MAX_DISTANCE; 
+      distanceImage.set(i, j, color(c, c, c));
+    }
+  } 
+
+
   // Images
   PImage depthImage = kinect.depthImage();
   PImage videoImage = kinect.rgbImage();
@@ -65,7 +79,7 @@ void draw() {
     }
   }
   colorMode(RGB);
-  
+
   // Create a OpenCV instance to detect edges
   OpenCV opencv = new OpenCV(this, backgroundLessDepthImage);
 
@@ -109,43 +123,43 @@ void draw() {
 
   // Get Joint Position And Convert 2D Positon
   int[] userList = kinect.getUsers();
-  for(int i=0;i<userList.length;i++){
-    if(kinect.isTrackingSkeleton(userList[i])){
-      kinect.getJointPositionSkeleton(userList[i],SimpleOpenNI.SKEL_RIGHT_HAND,jointPos3D);
+  for (int i=0; i<userList.length; i++) {
+    if (kinect.isTrackingSkeleton(userList[i])) {
+      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_RIGHT_HAND, jointPos3D);
       kinect.drawLimb(userList[i], SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
       kinect.convertRealWorldToProjective(jointPos3D, jointPos2D);
-  
+
       // Calculate Angle
       float angle;
-      angle=atan2((line.end.y-line.start.y),(line.end.x-line.start.x));
+      angle=atan2((line.end.y-line.start.y), (line.end.x-line.start.x));
       angle=degrees(angle);
-  
+
       // Draw a lightsaber
       pushMatrix();
       translate((line.start.x + line.end.x) / 2, (line.start.y + line.end.y) / 2);
       rotate(line.radian());
       imageMode(CENTER);
-      
+
       //right up vector
-      if(jointPos2D.x<=line.start.x && jointPos2D.y>=line.start.y && angle<=0){
+      if (jointPos2D.x<=line.start.x && jointPos2D.y>=line.start.y && angle<=0) {
         PImage lightSaber = loadImage("lightsaber_blue.png");
         lightSaber.resize((int) maxDistance, 0);
         image(lightSaber, 0, 0);
       }
       //right down vector
-      else if(jointPos2D.x<=line.start.x && jointPos2D.y<=line.start.y && angle>=0){
+      else if (jointPos2D.x<=line.start.x && jointPos2D.y<=line.start.y && angle>=0) {
         PImage lightSaber = loadImage("lightsaber_blue.png");
         lightSaber.resize((int) maxDistance, 0);
         image(lightSaber, 0, 0);
       }
       //left up vector
-      else if(jointPos2D.x>=line.start.x && jointPos2D.y>=line.start.y && angle>=0){
+      else if (jointPos2D.x>=line.start.x && jointPos2D.y>=line.start.y && angle>=0) {
         PImage lightSaber = loadImage("lightsaber_blue_rev.png");
         lightSaber.resize((int) maxDistance, 0);
         image(lightSaber, 0, 0);
       }
       //left down vector
-      else if(jointPos2D.x>=line.start.x && jointPos2D.y<=line.start.y && angle<=0){
+      else if (jointPos2D.x>=line.start.x && jointPos2D.y<=line.start.y && angle<=0) {
         PImage lightSaber = loadImage("lightsaber_blue_rev.png");
         lightSaber.resize((int) maxDistance, 0);
         image(lightSaber, 0, 0);
@@ -162,7 +176,7 @@ void onNewUser(SimpleOpenNI curContext, int userId)
 {
   println("onNewUser - userId: " + userId);
   println("\tstart tracking skeleton");
-  
+
   curContext.startTrackingSkeleton(userId);
 }
 
@@ -175,3 +189,4 @@ void onVisibleUser(SimpleOpenNI curContext, int userId)
 {
   //println("onVisibleUser - userId: " + userId);
 }
+
