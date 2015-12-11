@@ -5,39 +5,24 @@ I wanna be a Jedi Knight.
 
 # Dependencies
 
-- [Processing](https://processing.org/) 2.2.1
-- [OpenCV for Processing](https://github.com/atduskgreg/opencv-processing)
+- [Processing 2.2.1](https://processing.org/download/?processing)
 - [SimpleOpenNI](https://code.google.com/p/simple-openni/)
 
 
 # 開発環境の構築
 ## 推奨環境
-開発に必要な OS は UNIX です．
-Mac を持っていない人は適当な Linux をインストールしてください．
+[Processing 2.2.1](https://processing.org/download/?processing) をダウンロードし，ライブラリ SimpleOpenNI をインストールする．
 
-初心者には [\[お察しください\]ntu](https://www.ubuntulinux.jp/) がいいと思いますが，これから本格的にプログラミングをしていくであろう情報の学生には [Arch Linux](https://www.archlinux.org/) をおすすめします．
+ソースコードのバージョン管理には GitHub を使っているので，Git をインストールする必要がある．
+GitHub のアカウントを作成して，[Cygwin](https://www.cygwin.com/) もしくは [Git](https://git-scm.com/downloads) をインストールする．
 
-UNIX を使って開発を行いたい人は [@y-sira](https://github.com/y-sira) に聞いてください．
-OS のインストールから開発環境を整えるまでサポートします．
+```
+$ git config --global user.name "GitHub のユーザ名"
+$ git config --global user.email "GitHub に登録したメールアドレス"
+$ git config --global core.autocrlf false
+```
 
-基本的には [これだけ](http://qiita.com/sira/items/1fca78d1185a4e5997d9) です．
-
-
-## Windows（非推奨）
-実行はできないけど，コードを書くだけでもやりたい！という人は Windows でも大丈夫です．
-
-Processing は [ここ](https://processing.org/) からダウンロードできます．
-
-各種ライブラリは
-
-- [OpenKinect for Processing](https://github.com/shiffman/OpenKinect-for-Processing)
-- [OpenCV for Processing](https://github.com/atduskgreg/opencv-processing)
-
-からダウンロードして，ディレクトリ `Processing/liblaries` に配置してください．
-
-Git の導入は Cygwin から行えます．
-詳しくは [@526mapleleaf](https://github.com/526mapleleaf) に．
-
+すると，Git を使う準備が整う．
 
 
 # 開発の流れ
@@ -84,6 +69,7 @@ $ git push
 
 ※ 初回の `git push` 時は怒られるので，メッセージに従って `git push xxx` しましょう．
 
+完了したら，[ここ](https://github.com/y-sira/gu-jedi/branches) の自分が作ったブランチの New pull request ボタンを押し，Create pull request ボタンを押してください．
 
 
 ## その他の操作
@@ -111,6 +97,8 @@ $ git checkout master
 $ git fetch
 $ git merge origin/master
 ```
+
+`master` ブランチで下手に作業してしまうと，`origin/master` をマージできなくなってしまうので注意してください．
 
 
 ### ブランチの分岐地点を更新
