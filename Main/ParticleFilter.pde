@@ -1,5 +1,4 @@
-class ParticleFilter extends AbstractParticleFilter {
-
+final class ParticleFilter extends AbstractParticleFilter {
   public ParticleFilter(int n, double variance, PImage initImage) {
     super(n, variance, initImage);
   }
@@ -16,7 +15,7 @@ class ParticleFilter extends AbstractParticleFilter {
     int count = 0;
     for (int j = y - height / 2; j < y + height / 2; j++) {
       for (int i = x - width / 2; i < x + width / 2; i++) {
-        if (isInImage(i, j, image) && isRed(image.get(i, j))) {
+        if (isInImage(i, j, image) && isYellow(image.get(i, j))) {
           count++;
         }
       }
@@ -36,8 +35,5 @@ class ParticleFilter extends AbstractParticleFilter {
   private boolean isYellow(color c) {
     return(red(c) > 200.0 && green(c) > 200.0 && blue(c) < 150.0);
   }
-  
-  private boolean isRed(color c) {
-    return(red(c) > 200.0 && green(c) < 100.0 && blue(c) < 100.0);
-  }
 }
+
