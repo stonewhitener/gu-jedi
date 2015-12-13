@@ -76,7 +76,7 @@ class Kinect extends SimpleOpenNI {
     for (int y = 0; y < IMAGE_HEIGHT; y++) { 
       for (int x = 0; x < IMAGE_WIDTH; x++) {
         int pixel = x + y * IMAGE_WIDTH;
-        int c = 255 - 255 * depthMap[pixel] / MAX_DISTANCE; 
+        float c = 255.0 - 255.0 * (float) depthMap[pixel] / (float) MAX_DISTANCE; 
         distanceImage.set(x, y, color(c, c, c));
       }
     }
@@ -84,11 +84,11 @@ class Kinect extends SimpleOpenNI {
 
   private void updateNoBackgroundImage() {
     noBackgroundImage = createImage(rgbWidth(), rgbHeight(), RGB);
-    
+    int[] userMap = userMap();
     for (int y = 0; y < rgbHeight(); y++) {
       for (int x = 0; x < rgbWidth(); x++) {
         int pixel = x + y * rgbWidth();
-        if (userMap()[pixel] > 0) {
+        if (userMap[pixel] > 0) {
           noBackgroundImage.set(x, y, rgbImage().get(x, y));
         }
       }

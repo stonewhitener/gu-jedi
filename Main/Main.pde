@@ -25,6 +25,7 @@ void setup() {
   kinect.enableDepth();
   kinect.enableRGB();
   kinect.enableUser();
+  kinect.enableDistanceImage();
   kinect.enableNoBackgroundImage();
   kinect.enableUserImages();
   kinect.setMirror(false);
@@ -44,8 +45,8 @@ void draw() {
   kinect.update();
 
   // Images
-  PImage depthImage = kinect.depthImage();
   PImage videoImage = kinect.rgbImage();
+  PImage distanceImage = kinect.distanceImage();
   PImage noBackgroundImage = kinect.noBackgroundImage();
   PImage userImage = null;
   if (kinect.getNumberOfUsers() > 0) {
@@ -59,7 +60,7 @@ void draw() {
 
   // Sub Display
   image(videoImage, 640, 0, 320, 240);
-  image(depthImage, 640, 240, 320, 240);
+  image(distanceImage, 640, 240, 320, 240);
   image(noBackgroundImage, 960, 0, 320, 240);
   if (kinect.getNumberOfUsers() > 0) {
     image(userImage, 960, 240);
