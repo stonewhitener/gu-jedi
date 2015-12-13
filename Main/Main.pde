@@ -54,6 +54,9 @@ void draw() {
   }
   PImage jediImage = loadImage("background.jpg");
   
+  
+  kinect.writeUsers(jediImage);
+  
 
   // Main Display
   image(jediImage, 0, 0, 640, 480);

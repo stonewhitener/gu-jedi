@@ -21,6 +21,22 @@ class Kinect extends SimpleOpenNI {
   public Kinect(PApplet parent) {
     super(parent);
   }
+  
+  
+  public PImage writeUsers(PImage image) {
+    image.resize(rgbWidth(), rgbHeight());
+    int[] userMap = userMap();
+    for (int y = 0; y < rgbHeight(); y++) {
+      for (int x = 0; x < rgbWidth(); x++) {
+        int pixel = x + y * rgbWidth();
+        if (userMap[pixel] > 0) {
+          image.set(x, y, rgbImage().get(x, y));
+        }
+      }
+    }
+    
+    return image;
+  }
 
 
   public void enableDistanceImage() {
