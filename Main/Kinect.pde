@@ -24,12 +24,35 @@ class Kinect extends SimpleOpenNI {
   
   
   public PImage writeUsers(PImage image) {
+    if (image == null) return null;
+    
     image.resize(rgbWidth(), rgbHeight());
+    
     int[] userMap = userMap();
     for (int y = 0; y < rgbHeight(); y++) {
       for (int x = 0; x < rgbWidth(); x++) {
         int pixel = x + y * rgbWidth();
         if (userMap[pixel] > 0) {
+          image.set(x, y, rgbImage().get(x, y));
+        }
+      }
+    }
+    
+    return image;
+  }
+  
+  public PImage writeUser(int userId, PImage image) {
+    if (image == null) return null;
+    if (userId > 7 || userId < 1) return image;
+    if (getNumberOfUsers() < 1) return image;
+    
+    image.resize(rgbWidth(), rgbHeight());
+    
+    int[] userMap = userMap();
+    for (int y = 0; y < rgbHeight(); y++) {
+      for (int x = 0; x < rgbWidth(); x++) {
+        int pixel = x + y * rgbWidth();
+        if (userMap[pixel] == userId) {
           image.set(x, y, rgbImage().get(x, y));
         }
       }
