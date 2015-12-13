@@ -66,7 +66,7 @@ $ git commit -m "ここをこうやって変更した"
 $ git push
 ```
 
-※ 初回の `git push` 時は怒られるので，メッセージに従って `git push xxx` しましょう．
+※ 初回の `git push` 時は怒られるので，メッセージに従って `git push --set-upstream origin xxxxx` しましょう．
 
 完了したら，[ここ](https://github.com/y-sira/gu-jedi/branches) の自分が作ったブランチの New pull request ボタンを押し，Create pull request ボタンを押してください．
 
