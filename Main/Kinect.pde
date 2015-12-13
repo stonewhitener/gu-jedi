@@ -4,8 +4,7 @@ class Kinect extends SimpleOpenNI {
   private final static int IMAGE_WIDTH = 640;
   private final static int IMAGE_HEIGHT = 480;
 
-  // Max distance (= 2^13 - 1) 
-  // Reference: https://msdn.microsoft.com/en-us/library/hh973078.aspx 
+  // Max distance = 2^13 - 1, ref: https://msdn.microsoft.com/en-us/library/hh973078.aspx 
   private final static int MAX_DISTANCE = 8191; 
 
 
@@ -19,8 +18,8 @@ class Kinect extends SimpleOpenNI {
   private PImage[] userImages;
   
 
-  public Kinect(PApplet applet) {
-    super(applet);
+  public Kinect(PApplet parent) {
+    super(parent);
   }
 
 
@@ -63,10 +62,13 @@ class Kinect extends SimpleOpenNI {
   
   public PImage userImage(int userId) {
     if (userId == 0) return null;
-    
     return userImages[userId];
   }
 
+  // userImages[0] is always null, array index must be user ID.
+  public PImage[] userImages() {
+    return userImages;
+  }
 
   private void updateDistanceImage() {
     distanceImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
@@ -94,21 +96,23 @@ class Kinect extends SimpleOpenNI {
   }
 
   private void updateUserImages() {
-    int[] max_x = new int[getNumberOfUsers() + 1];
-    int[] min_x = new int[getNumberOfUsers() + 1];
-    int[] max_y = new int[getNumberOfUsers() + 1];
-    int[] min_y = new int[getNumberOfUsers() + 1];
+    final int numOfUsers = getNumberOfUsers();
+    int[] max_x = new int[numOfUsers + 1];
+    int[] min_x = new int[numOfUsers + 1];
+    int[] max_y = new int[numOfUsers + 1];
+    int[] min_y = new int[numOfUsers + 1];
 
     Arrays.fill(max_x, 0);
     Arrays.fill(min_x, IMAGE_WIDTH);
     Arrays.fill(max_y, 0);
     Arrays.fill(min_y, IMAGE_HEIGHT);
 
+    int[] userMap = userMap();
     for (int y = 0; y < IMAGE_HEIGHT; y++) {
       for (int x = 0; x < IMAGE_WIDTH; x++) {
         int pixel = x + y * IMAGE_WIDTH;
-        for (int i = 1; i <= getNumberOfUsers (); i++) {
-          if (i == userMap()[pixel]) {
+        for (int i = 1; i <= numOfUsers; i++) {
+          if (i == userMap[pixel]) {
             if (max_x[i] < x) max_x[i] = x;
             if (min_x[i] > x) min_x[i] = x;
             if (max_y[i] < y) max_y[i] = y;
@@ -118,15 +122,15 @@ class Kinect extends SimpleOpenNI {
       }
     }
 
-    userImages = new PImage[getNumberOfUsers() + 1];
+    userImages = new PImage[numOfUsers + 1];
     Arrays.fill(userImages, null);
 
-    for (int i = 1; i <= getNumberOfUsers(); i++) {
+    for (int i = 1; i <= numOfUsers; i++) {
       userImages[i] = createImage(max_x[i] - min_x[i] + 1, max_y[i] - min_x[i] + 1, RGB);
       for (int y = min_y[i]; y <= max_y[i]; y++) {
         for (int x = min_x[i]; x <= max_x[i]; x++) {
           int pixel = x + y * IMAGE_WIDTH;
-          if (i == userMap()[pixel]) {
+          if (i == userMap[pixel]) {
             userImages[i].set(x - min_x[i], y - min_y[i], rgbImage().get(x, y));
           }
         }

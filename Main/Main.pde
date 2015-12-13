@@ -5,7 +5,7 @@ final static int IMAGE_WIDTH = 640;
 final static int IMAGE_HEIGHT = 480;
 
 // Variables for instances
-SimpleOpenNI kinect;
+Kinect kinect;
 ParticleFilter particleFilter;
 
 
@@ -27,14 +27,14 @@ void setup() {
   kinect.enableUser();
   kinect.enableNoBackgroundImage();
   kinect.enableUserImages();
-  kinect.setMirror(true);
+  kinect.setMirror(false);
   kinect.alternativeViewPointDepthToImage();
   
   // Initialize particle filter
-  particleFilter = new ParticleFilter(2000, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
+  particleFilter = new ParticleFilter(500, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
 
   // Set frame rate
-  frameRate(30);
+  frameRate(20);
   
   // Set background color black
   background(0);
@@ -47,7 +47,10 @@ void draw() {
   PImage depthImage = kinect.depthImage();
   PImage videoImage = kinect.rgbImage();
   PImage noBackgroundImage = kinect.noBackgroundImage();
-  PImage userImage = kinect.userImage(1);
+  PImage userImage = null;
+  if (kinect.getNumberOfUsers() > 0) {
+    userImage = kinect.userImage(1);
+  }
   PImage jediImage = loadImage("background.jpg");
   
 
@@ -59,11 +62,11 @@ void draw() {
   image(depthImage, 640, 240, 320, 240);
   image(noBackgroundImage, 960, 0, 320, 240);
   if (kinect.getNumberOfUsers() > 0) {
-    image(userImage(1), 960, 240, 320, 240);
+    image(userImage, 960, 240);
   }
 
   // Update particles
-  particleFilter.update(backgroundLessImage);
+  particleFilter.update(noBackgroundImage);
   particleFilter.drawParticles(color(255, 0, 0), 2);
   particleFilter.drawRectangle(color(255, 0, 0), 2, 30, 30);
 }
