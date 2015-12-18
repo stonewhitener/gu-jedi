@@ -1,3 +1,5 @@
+import gab.opencv.*;
+
 // Size
 final static int WINDOW_WIDTH = 1280;
 final static int WINDOW_HEIGHT = 480;
@@ -6,7 +8,6 @@ final static int IMAGE_HEIGHT = 480;
 
 // Variables for instances
 Kinect kinect;
-ParticleFilter particleFilter;
 
 
 void setup() {
@@ -28,11 +29,8 @@ void setup() {
   kinect.setMirror(false);
   kinect.alternativeViewPointDepthToImage();
   
-  // Initialize particle filter
-  particleFilter = new ParticleFilter(500, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
-
   // Set frame rate
-  frameRate(20);
+  frameRate(30);
   
   // Set background color black
   background(0);
@@ -43,16 +41,12 @@ void draw() {
 
   // Images
   PImage videoImage = kinect.rgbImage();
-  PImage distanceImage = kinect.distanceImage();
-  PImage noBackgroundImage = kinect.noBackgroundImage();
-  PImage userImage = null;
-  if (kinect.getNumberOfUsers() > 0) {
-    userImage = kinect.userImage(1);
-  }
+  PImage depthImage = kinect.depthImage();
+  PImage noBackgroundDepthImage = kinect.noBackgroundDepthImage();
+  
+  
   PImage jediImage = loadImage("background.jpg");
-  
-  
-  kinect.drawUser(1, jediImage);
+  kinect.drawUsers(jediImage);
   
 
   // Main Display
@@ -60,15 +54,50 @@ void draw() {
 
   // Sub Display
   image(videoImage, 640, 0, 320, 240);
-  image(distanceImage, 640, 240, 320, 240);
-  image(noBackgroundImage, 960, 0, 320, 240);
-  if (kinect.getNumberOfUsers() > 0) {
-    image(userImage, 960, 240);
-  }
+  image(depthImage, 640, 240, 320, 240);
+  image(noBackgroundDepthImage, 960, 0, 320, 240);
+  
+  OpenCV opencv = new OpenCV(this, noBackgroundDepthImage);
+  opencv.findCannyEdges(20, 75);
+  image(opencv.getOutput(), 960, 240, 320, 240);
 
-  // Update particles
-  particleFilter.update(noBackgroundImage);
-  particleFilter.drawParticles(color(255, 0, 0), 2);
-  particleFilter.drawRectangle(color(255, 0, 0), 2, 30, 30);
+  ArrayList<gab.opencv.Line> lines = opencv.findLines(100, 30, 20);
+  
+  /**
+   * Select a line which has a maximum length 
+   */
+  float maxDistance = 0;
+  int indexMax = -1;
+  for (int i = 0; i < lines.size (); i++) {
+    float length = sqrt(pow((lines.get(i).start.x - lines.get(i).end.x), 2) + pow((lines.get(i).start.y - lines.get(i).end.y), 2));
+
+    if (maxDistance < length) {
+      maxDistance = length;
+      indexMax = i;
+    }
+  }
+  
+  /**
+   * Draw a lightsaber by using a line which has a maximum length
+   */
+  if (indexMax == -1) {
+    return;
+  }
+  
+  Line maxLine = new Line(
+    new PVector(lines.get(indexMax).start.x, lines.get(indexMax).start.y),
+    new PVector(lines.get(indexMax).end.x, lines.get(indexMax).end.y)
+  );
+  
+  PImage lightSaber = loadImage("lightsaber_blue.png");
+  pushMatrix();
+  translate((maxLine.start.x + maxLine.end.x) / 2, (maxLine.start.y + maxLine.end.y) / 2);
+  rotate((float) maxLine.radian);
+  imageMode(CENTER);
+  lightSaber.resize((int) maxDistance, 0);
+  image(lightSaber, 0, 0);
+  imageMode(CORNER);
+  translate(- (maxLine.start.x + maxLine.end.x) / 2, - (maxLine.start.y + maxLine.end.y) / 2);
+  popMatrix();
 }
 

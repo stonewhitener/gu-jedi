@@ -5,20 +5,20 @@ class Kinect extends SimpleOpenNI {
   private final static int IMAGE_HEIGHT = 480;
 
   // Max distance = 2^13 - 1
-  // Reference: https://msdn.microsoft.com/en-us/library/hh973078.aspx 
-  private final static int MAX_DISTANCE = 8191; 
+  // Reference: https://msdn.microsoft.com/en-us/library/hh973078.aspx
+  private final static int MAX_DISTANCE = 8191;
 
 
   public Kinect(PApplet parent) {
     super(parent);
   }
-  
-  
+
+
   public PImage drawUsers(PImage image) {
     if (image == null) return null;
-    
+
     image.resize(rgbWidth(), rgbHeight());
-    
+
     int[] userMap = userMap();
     for (int y = 0; y < rgbHeight(); y++) {
       for (int x = 0; x < rgbWidth(); x++) {
@@ -28,17 +28,17 @@ class Kinect extends SimpleOpenNI {
         }
       }
     }
-    
+
     return image;
   }
-  
+
   public PImage drawUser(int userId, PImage image) {
     if (image == null) return null;
     if (userId > 7 || userId < 1) return image;
     if (getNumberOfUsers() < 1) return image;
-    
+
     image.resize(rgbWidth(), rgbHeight());
-    
+
     int[] userMap = userMap();
     for (int y = 0; y < rgbHeight(); y++) {
       for (int x = 0; x < rgbWidth(); x++) {
@@ -48,7 +48,7 @@ class Kinect extends SimpleOpenNI {
         }
       }
     }
-    
+
     return image;
   }
 
@@ -56,14 +56,14 @@ class Kinect extends SimpleOpenNI {
   public PImage distanceImage() {
     PImage distanceImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
     int depthMap[] = depthMap();
-    for (int y = 0; y < IMAGE_HEIGHT; y++) { 
+    for (int y = 0; y < IMAGE_HEIGHT; y++) {
       for (int x = 0; x < IMAGE_WIDTH; x++) {
         int pixel = x + y * IMAGE_WIDTH;
-        float c = 255.0 - 255.0 * (float) depthMap[pixel] / (float) MAX_DISTANCE; 
+        float c = 255.0 - 255.0 * (float) depthMap[pixel] / (float) MAX_DISTANCE;
         distanceImage.set(x, y, color(c, c, c));
       }
     }
-    
+
     return distanceImage;
   }
 
@@ -78,10 +78,10 @@ class Kinect extends SimpleOpenNI {
         }
       }
     }
-    
+
     return noBackgroundImage;
   }
-  
+
   public PImage noBackgroundDepthImage() {
     PImage noBackgroundImage = createImage(rgbWidth(), rgbHeight(), RGB);
     int[] userMap = userMap();
@@ -93,7 +93,7 @@ class Kinect extends SimpleOpenNI {
         }
       }
     }
-    
+
     return noBackgroundImage;
   }
 
@@ -139,8 +139,8 @@ class Kinect extends SimpleOpenNI {
         }
       }
     }
-    
+
     return userImages[userId];
   }
-  
+
 }
