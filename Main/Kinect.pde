@@ -165,7 +165,7 @@ class Kinect extends SimpleOpenNI {
     Arrays.fill(userImages, null);
 
     for (int i = 1; i <= numOfUsers; i++) {
-      userImages[i] = createImage(max_x[i] - min_x[i] + 1, max_y[i] - min_x[i] + 1, RGB);
+      userImages[i] = createImage(max_x[i] - min_x[i] + 1, max_y[i] - min_y[i] + 1, RGB);
       for (int y = min_y[i]; y <= max_y[i]; y++) {
         for (int x = min_x[i]; x <= max_x[i]; x++) {
           int pixel = x + y * IMAGE_WIDTH;
