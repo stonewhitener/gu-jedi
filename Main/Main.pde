@@ -25,9 +25,6 @@ void setup() {
   kinect.enableDepth();
   kinect.enableRGB();
   kinect.enableUser();
-  kinect.enableDistanceImage();
-  kinect.enableNoBackgroundImage();
-  kinect.enableUserImages();
   kinect.setMirror(false);
   kinect.alternativeViewPointDepthToImage();
   
