@@ -14,7 +14,7 @@ class Kinect extends SimpleOpenNI {
   }
   
   
-  public PImage writeUsers(PImage image) {
+  public PImage drawUsers(PImage image) {
     if (image == null) return null;
     
     image.resize(rgbWidth(), rgbHeight());
@@ -32,7 +32,7 @@ class Kinect extends SimpleOpenNI {
     return image;
   }
   
-  public PImage writeUser(int userId, PImage image) {
+  public PImage drawUser(int userId, PImage image) {
     if (image == null) return null;
     if (userId > 7 || userId < 1) return image;
     if (getNumberOfUsers() < 1) return image;
