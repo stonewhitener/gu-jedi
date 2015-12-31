@@ -43,11 +43,14 @@ void draw() {
   PImage videoImage = kinect.rgbImage();
   PImage depthImage = kinect.depthImage();
   PImage noBackgroundDepthImage = kinect.noBackgroundDepthImage();
-  
-  
   PImage jediImage = loadImage("background.jpg");
+  
+  // Draw user
   kinect.drawUsers(jediImage);
   
+  // Detect edges
+  OpenCV opencv = new OpenCV(this, noBackgroundDepthImage);
+  opencv.findCannyEdges(20, 75);
 
   // Main Display
   image(jediImage, 0, 0, 640, 480);
@@ -56,11 +59,9 @@ void draw() {
   image(videoImage, 640, 0, 320, 240);
   image(depthImage, 640, 240, 320, 240);
   image(noBackgroundDepthImage, 960, 0, 320, 240);
-  
-  OpenCV opencv = new OpenCV(this, noBackgroundDepthImage);
-  opencv.findCannyEdges(20, 75);
   image(opencv.getOutput(), 960, 240, 320, 240);
 
+  // Find lines
   ArrayList<gab.opencv.Line> lines = opencv.findLines(100, 30, 20);
   
   /**
