@@ -81,6 +81,21 @@ class Kinect extends SimpleOpenNI {
     
     return noBackgroundImage;
   }
+  
+  public PImage noBackgroundDepthImage() {
+    PImage noBackgroundImage = createImage(rgbWidth(), rgbHeight(), RGB);
+    int[] userMap = userMap();
+    for (int y = 0; y < rgbHeight(); y++) {
+      for (int x = 0; x < rgbWidth(); x++) {
+        int pixel = x + y * rgbWidth();
+        if (userMap[pixel] > 0) {
+          noBackgroundImage.set(x, y, depthImage().get(x, y));
+        }
+      }
+    }
+    
+    return noBackgroundImage;
+  }
 
   public PImage userImage(int userId) {
     final int numOfUsers = getNumberOfUsers();
