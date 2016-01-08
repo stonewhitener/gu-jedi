@@ -4,26 +4,17 @@ class Kinect extends SimpleOpenNI {
   private final static int IMAGE_WIDTH = 640;
   private final static int IMAGE_HEIGHT = 480;
 
-  // Max distance = 2^13 - 1, ref: https://msdn.microsoft.com/en-us/library/hh973078.aspx 
+  // Max distance = 2^13 - 1
+  // Reference: https://msdn.microsoft.com/en-us/library/hh973078.aspx 
   private final static int MAX_DISTANCE = 8191; 
 
-
-  private boolean isEnableDistanceImage = false;
-  private PImage distanceImage;
-
-  private boolean isEnableNoBackgroundImage = false;
-  private PImage noBackgroundImage;
-  
-  private boolean isEnableUserImages = false;
-  private PImage[] userImages;
-  
 
   public Kinect(PApplet parent) {
     super(parent);
   }
   
   
-  public PImage writeUsers(PImage image) {
+  public PImage drawUsers(PImage image) {
     if (image == null) return null;
     
     image.resize(rgbWidth(), rgbHeight());
@@ -41,7 +32,7 @@ class Kinect extends SimpleOpenNI {
     return image;
   }
   
-  public PImage writeUser(int userId, PImage image) {
+  public PImage drawUser(int userId, PImage image) {
     if (image == null) return null;
     if (userId > 7 || userId < 1) return image;
     if (getNumberOfUsers() < 1) return image;
@@ -62,55 +53,8 @@ class Kinect extends SimpleOpenNI {
   }
 
 
-  public void enableDistanceImage() {
-    isEnableDistanceImage = true;
-  }
-  
-  public void enableNoBackgroundImage() {
-    isEnableNoBackgroundImage = true;
-  }
-  
-  public void enableUserImages() {
-    isEnableUserImages = true;
-  }
-
-
-  @Override
-  public void update() {
-    super.update();
-
-    if (isEnableDistanceImage) {
-      updateDistanceImage();
-    }
-    if (isEnableNoBackgroundImage) {
-      updateNoBackgroundImage();
-    }
-    if (isEnableUserImages) {
-      updateUserImages();
-    }
-  }
-
-
   public PImage distanceImage() {
-    return distanceImage;
-  }
-  
-  public PImage noBackgroundImage() {
-    return noBackgroundImage;
-  }
-  
-  public PImage userImage(int userId) {
-    if (userId == 0) return null;
-    return userImages[userId];
-  }
-
-  // userImages[0] is always null, array index must be user ID.
-  public PImage[] userImages() {
-    return userImages;
-  }
-
-  private void updateDistanceImage() {
-    distanceImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
+    PImage distanceImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
     int depthMap[] = depthMap();
     for (int y = 0; y < IMAGE_HEIGHT; y++) { 
       for (int x = 0; x < IMAGE_WIDTH; x++) {
@@ -119,10 +63,12 @@ class Kinect extends SimpleOpenNI {
         distanceImage.set(x, y, color(c, c, c));
       }
     }
+    
+    return distanceImage;
   }
 
-  private void updateNoBackgroundImage() {
-    noBackgroundImage = createImage(rgbWidth(), rgbHeight(), RGB);
+  public PImage noBackgroundImage() {
+    PImage noBackgroundImage = createImage(rgbWidth(), rgbHeight(), RGB);
     int[] userMap = userMap();
     for (int y = 0; y < rgbHeight(); y++) {
       for (int x = 0; x < rgbWidth(); x++) {
@@ -132,9 +78,26 @@ class Kinect extends SimpleOpenNI {
         }
       }
     }
+    
+    return noBackgroundImage;
+  }
+  
+  public PImage noBackgroundDepthImage() {
+    PImage noBackgroundImage = createImage(rgbWidth(), rgbHeight(), RGB);
+    int[] userMap = userMap();
+    for (int y = 0; y < rgbHeight(); y++) {
+      for (int x = 0; x < rgbWidth(); x++) {
+        int pixel = x + y * rgbWidth();
+        if (userMap[pixel] > 0) {
+          noBackgroundImage.set(x, y, depthImage().get(x, y));
+        }
+      }
+    }
+    
+    return noBackgroundImage;
   }
 
-  private void updateUserImages() {
+  public PImage userImage(int userId) {
     final int numOfUsers = getNumberOfUsers();
     int[] max_x = new int[numOfUsers + 1];
     int[] min_x = new int[numOfUsers + 1];
@@ -146,6 +109,7 @@ class Kinect extends SimpleOpenNI {
     Arrays.fill(max_y, 0);
     Arrays.fill(min_y, IMAGE_HEIGHT);
 
+    // Calculate userImage's positions
     int[] userMap = userMap();
     for (int y = 0; y < IMAGE_HEIGHT; y++) {
       for (int x = 0; x < IMAGE_WIDTH; x++) {
@@ -161,7 +125,7 @@ class Kinect extends SimpleOpenNI {
       }
     }
 
-    userImages = new PImage[numOfUsers + 1];
+    PImage[] userImages = new PImage[numOfUsers + 1];
     Arrays.fill(userImages, null);
 
     for (int i = 1; i <= numOfUsers; i++) {
@@ -175,6 +139,8 @@ class Kinect extends SimpleOpenNI {
         }
       }
     }
+    
+    return userImages[userId];
   }
   
 }
