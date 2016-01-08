@@ -181,17 +181,24 @@ abstract class AbstractParticleFilter {
     return new Particle((int) (x / weight), (int) (y / weight), 1.0);
   }
   
-  public boolean isConvergent() {
+  public boolean isConvergent(double threshold) {
     double d=0.0;
     Particle average = measure();
+    
     for(int i = 0; i < particles.size(); i++) {
-      d += sqrt(pow((float)particles.get(i).x - (float)average.x,2.0)+pow((float)particles.get(i).y - (float)average.y,2.0));
+      d += sqrt(
+        pow(particles.get(i).x - average.x, 2)
+        +pow(particles.get(i).y - average.y, 2)
+      );
     }
+    
     d = d / particles.size();
-    if(d<60) {
+    
+    if (d < threshold) {
       return true;
     } else {
       return false;
     }
   }
+  
 }
