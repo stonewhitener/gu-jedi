@@ -8,7 +8,14 @@ final class Line {
     this.start = start;
     this.end = end;
     this.radian = atan((end.y - start.y) / (end.x - start.x));
-    this.length = sqrt(pow((end.x - start.x), 2) + pow((end.y - start.y), 2));
+    
+    double length = sqrt(pow((end.x - start.x), 2) + pow((end.y - start.y), 2));
+    
+    if (length <= 0) {
+      this.length = 1;
+    } else {
+      this.length = length;
+    }
   }
   
   public Line clone() {
