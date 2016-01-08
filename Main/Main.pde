@@ -85,7 +85,7 @@ void draw() {
         kinect.convertRealWorldToProjective(jointPos3D, jointPos2D);
         
         
-        if (particleFilterRed.isConvergent(60) && userList[i] == 0) {  
+        if (particleFilterRed.isConvergent(60) && userList[i] == 2) {  
         Particle average = particleFilterRed.measure();
 
         Line saberLine = new Line(
@@ -108,7 +108,7 @@ void draw() {
         //println(average.y);
       }
       
-      if (particleFilterYellow.isConvergent(60)) {  
+      if (particleFilterYellow.isConvergent(60) && userList[i] == 1 ) {  
         Particle average = particleFilterYellow.measure();
 
         Line saberLine = new Line(
@@ -120,7 +120,7 @@ void draw() {
         translate((saberLine.start.x + saberLine.end.x) / 2, (saberLine.start.y + saberLine.end.y) / 2);
         rotate((float) saberLine.radian);
         imageMode(CENTER);
-        PImage lightSaber = loadImage("lightsaber_blue.png");
+        PImage lightSaber = loadImage("lightsaber_red.png");
         lightSaber.resize((int) saberLine.length, 0);
         image(lightSaber, 0, 0);
         imageMode(CORNER);
