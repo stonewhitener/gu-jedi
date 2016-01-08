@@ -7,7 +7,7 @@ final class Line {
   public Line(PVector start, PVector end) {
     this.start = start;
     this.end = end;
-    this.radian = atan2((end.y - start.y)  (end.x - start.x));
+    this.radian = atan2((end.y - start.y) ,(end.x - start.x));
     this.length = sqrt(pow((end.x - start.x), 2) + pow((end.y - start.y), 2));
   }
   
