@@ -94,6 +94,8 @@ abstract class AbstractParticleFilter {
     //println("at (" + maxParticle.x + ", " + maxParticle.y + ")");
     //----------------------------------------------------------------
 
+
+
     for (int i = 0; i < particles.size(); i++) {
       particles.set(i, new Particle(maxParticle.x, maxParticle.y, maxParticle.weight));
     }
@@ -165,7 +167,7 @@ abstract class AbstractParticleFilter {
     }
   }
 
-  private Particle measure() {
+  public Particle measure() {
     double x = 0.0;
     double y = 0.0;
     double weight = 0.0;
@@ -178,4 +180,25 @@ abstract class AbstractParticleFilter {
 
     return new Particle((int) (x / weight), (int) (y / weight), 1.0);
   }
+  
+  public boolean isConvergent(double threshold) {
+    double d=0.0;
+    Particle average = measure();
+    
+    for(int i = 0; i < particles.size(); i++) {
+      d += sqrt(
+        pow(particles.get(i).x - average.x, 2)
+        +pow(particles.get(i).y - average.y, 2)
+      );
+    }
+    
+    d = d / particles.size();
+    
+    if (d < threshold) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
 }
