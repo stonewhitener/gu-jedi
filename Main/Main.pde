@@ -89,7 +89,7 @@ void draw() {
         Particle average = particleFilterRed.measure();
 
         Line saberLine = new Line(
-          new PVector(jointPos2D.x, jointPos2D.y), 
+          new PVector(jointPos2D.x, jointPos2D.y),
           new PVector(average.x, average.y)
         );
 
@@ -112,7 +112,7 @@ void draw() {
         Particle average = particleFilterYellow.measure();
 
         Line saberLine = new Line(
-          new PVector(jointPos2D.x, jointPos2D.y), 
+          new PVector(jointPos2D.x, jointPos2D.y),
           new PVector(average.x, average.y)
         );
 
