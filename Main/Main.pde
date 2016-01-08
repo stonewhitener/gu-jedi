@@ -8,23 +8,8 @@ final static int IMAGE_HEIGHT = 480;
 Kinect kinect;
 ParticleFilterRed particleFilter;
 
-// Variables for hands detection
-int handVecListSize = 20;
-Map<Integer, ArrayList<PVector>> handPathList = new HashMap<Integer, ArrayList<PVector>>();
-
 PVector jointPos3D = new PVector();
 PVector jointPos2D = new PVector();
-
-// User color
-color[] userColor = new color[] { 
-  color(255, 0, 0), 
-  color(0, 255, 0), 
-  color(0, 0, 255), 
-  color(255, 255, 0), 
-  color(255, 0, 255), 
-  color(0, 255, 255)
-};
-
 
 void setup() {
   // Set window size
@@ -44,8 +29,6 @@ void setup() {
   kinect.enableUser();
   kinect.setMirror(false);
   kinect.alternativeViewPointDepthToImage();
-  kinect.enableHand();
-  kinect.startGesture(SimpleOpenNI.GESTURE_WAVE);
   
   // Initialize particle filter
   particleFilter = new ParticleFilterRed(500, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
@@ -87,38 +70,6 @@ void draw() {
   particleFilter.update(noBackgroundImage);
   particleFilter.drawParticles(color(255, 0, 0), 2);
   particleFilter.drawRectangle(color(255, 0, 0), 2, 30, 30);
-
-  // Draw hands
-  if (handPathList.size() > 0) {    
-    Iterator itr = handPathList.entrySet().iterator();     
-    while (itr.hasNext ()) {
-      Map.Entry mapEntry = (Map.Entry)itr.next(); 
-      int handId =  (Integer)mapEntry.getKey();
-      ArrayList<PVector> vecList = (ArrayList<PVector>)mapEntry.getValue();
-      PVector p;
-      PVector p2d = new PVector();
-
-      stroke(userColor[(handId - 1) % userColor.length]);
-      noFill(); 
-      strokeWeight(1);        
-      Iterator itrVec = vecList.iterator(); 
-      
-      beginShape();
-      while (itrVec.hasNext ()) { 
-        p = (PVector) itrVec.next(); 
-
-        kinect.convertRealWorldToProjective(p, p2d);
-        vertex(p2d.x, p2d.y);
-      }
-      endShape();   
-
-      stroke(userColor[(handId - 1) % userColor.length]);
-      strokeWeight(4);
-      p = vecList.get(0);
-      kinect.convertRealWorldToProjective(p, p2d);
-      point(p2d.x, p2d.y);
-    }
-  }
 
   // Draw lightsaber
   if (particleFilter.isConvergent(60)) {
