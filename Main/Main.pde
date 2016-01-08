@@ -6,11 +6,16 @@ final static int IMAGE_HEIGHT = 480;
 
 // Variables for instances
 Kinect kinect;
-ParticleFilter particleFilter;
+ParticleFilterRed particleFilter;
 
+// Variables for hands detection
 int handVecListSize = 20;
 Map<Integer, ArrayList<PVector>> handPathList = new HashMap<Integer, ArrayList<PVector>>();
 
+PVector jointPos3D = new PVector();
+PVector jointPos2D = new PVector();
+
+// User color
 color[] userColor = new color[] { 
   color(255, 0, 0), 
   color(0, 255, 0), 
@@ -20,8 +25,6 @@ color[] userColor = new color[] {
   color(0, 255, 255)
 };
 
-PVector jointPos3D = new PVector();
-PVector jointPos2D = new PVector();
 
 void setup() {
   // Set window size
@@ -45,7 +48,7 @@ void setup() {
   kinect.startGesture(SimpleOpenNI.GESTURE_WAVE);
   
   // Initialize particle filter
-  particleFilter = new ParticleFilter(500, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
+  particleFilter = new ParticleFilterRed(500, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
 
   // Set frame rate
   frameRate(20);
@@ -151,6 +154,7 @@ void draw() {
       }
     }
   }
+  
 }
 
 void onNewUser(SimpleOpenNI curContext, int userId) {
@@ -165,6 +169,6 @@ void onLostUser(SimpleOpenNI curContext, int userId) {
 }
 
 void onVisibleUser(SimpleOpenNI curContext, int userId) {
-  //println("onVisibleUser - userId: " + userId);
+  println("onVisibleUser - userId: " + userId);
 }
 

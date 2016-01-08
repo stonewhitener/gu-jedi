@@ -9,8 +9,8 @@ final class ParticleFilterRed extends AbstractParticleFilter {
 
   @Override
   protected double likelihood(int x, int y, PImage image) {
-    final int width = 30;
-    final int height = 30;
+    final int width = 10;
+    final int height = 10;
 
     int count = 0;
     for (int j = y - height / 2; j < y + height / 2; j++) {
