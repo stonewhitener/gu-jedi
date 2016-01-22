@@ -32,7 +32,7 @@ class Kinect extends SimpleOpenNI {
     return image;
   }
   
-  public PImage drawUser(int userId, PImage image) {
+  /*public PImage drawUser(int userId, PImage image) {
     if (image == null) return null;
     if (userId > 7 || userId < 1) return image;
     if (getNumberOfUsers() < 1) return image;
@@ -65,7 +65,7 @@ class Kinect extends SimpleOpenNI {
     }
     
     return distanceImage;
-  }
+  }*/
 
   public PImage noBackgroundImage() {
     PImage noBackgroundImage = createImage(rgbWidth(), rgbHeight(), RGB);
@@ -82,7 +82,7 @@ class Kinect extends SimpleOpenNI {
     return noBackgroundImage;
   }
   
-  public PImage noBackgroundDepthImage() {
+  /*public PImage noBackgroundDepthImage() {
     PImage noBackgroundImage = createImage(rgbWidth(), rgbHeight(), RGB);
     int[] userMap = userMap();
     for (int y = 0; y < rgbHeight(); y++) {
@@ -95,7 +95,7 @@ class Kinect extends SimpleOpenNI {
     }
     
     return noBackgroundImage;
-  }
+  }*/
 
   public PImage userImage(int userId) {
     final int numOfUsers = getNumberOfUsers();

@@ -1,5 +1,5 @@
 // Size
-final static int WINDOW_WIDTH = 1280;
+final static int WINDOW_WIDTH = 640;
 final static int WINDOW_HEIGHT = 480;
 final static int IMAGE_WIDTH = 640;
 final static int IMAGE_HEIGHT = 480;
@@ -45,13 +45,13 @@ void draw() {
   kinect.update();
 
   // Images
-  PImage videoImage = kinect.rgbImage();
-  PImage distanceImage = kinect.distanceImage();
+  //PImage videoImage = kinect.rgbImage();
+  //PImage distanceImage = kinect.distanceImage();
   PImage noBackgroundImage = kinect.noBackgroundImage();
-  PImage userImage = null;
-  if (kinect.getNumberOfUsers() > 0) {
-    userImage = kinect.userImage(1);
-  }
+  //PImage userImage = null;
+  //if (kinect.getNumberOfUsers() > 0) {
+  // userImage = kinect.userImage(1);
+  //}
   PImage jediImage = loadImage("background.jpg");
 
   kinect.drawUsers(jediImage);
@@ -60,12 +60,12 @@ void draw() {
   image(jediImage, 0, 0, 640, 480);
 
   // Sub Display
-  image(videoImage, 640, 0, 320, 240);
-  image(distanceImage, 640, 240, 320, 240);
-  image(noBackgroundImage, 960, 0, 320, 240);
-  if (kinect.getNumberOfUsers() > 0) {
-    image(userImage, 960, 240);
-  }
+  //image(videoImage, 640, 0, 320, 240);
+  //image(distanceImage, 640, 240, 320, 240);
+  //image(noBackgroundImage, 960, 0, 320, 240);
+  //if (kinect.getNumberOfUsers() > 0) {
+  //  image(userImage, 960, 240);
+  //}
 
   // Update particles
   particleFilterRed.update(noBackgroundImage);
