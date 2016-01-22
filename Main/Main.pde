@@ -6,7 +6,8 @@ final static int IMAGE_HEIGHT = 480;
 
 // Variables for instances
 Kinect kinect;
-ParticleFilterRed particleFilter;
+ParticleFilterRed particleFilterRed;
+ParticleFilterYellow particleFilterYellow;
 
 PVector jointPos3D = new PVector();
 PVector jointPos2D = new PVector();
@@ -27,11 +28,11 @@ void setup() {
   kinect.enableDepth();
   kinect.enableRGB();
   kinect.enableUser();
-  kinect.setMirror(false);
   kinect.alternativeViewPointDepthToImage();
   
   // Initialize particle filter
-  particleFilter = new ParticleFilterRed(500, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
+  particleFilterRed = new ParticleFilterRed(500, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
+  particleFilterYellow = new ParticleFilterYellow(500, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
 
   // Set frame rate
   frameRate(20);
@@ -53,7 +54,7 @@ void draw() {
   }
   PImage jediImage = loadImage("background.jpg");
 
-  kinect.drawUser(1, jediImage);
+  kinect.drawUsers(jediImage);
 
   // Main Display
   image(jediImage, 0, 0, 640, 480);
@@ -67,25 +68,53 @@ void draw() {
   }
 
   // Update particles
-  particleFilter.update(noBackgroundImage);
-  particleFilter.drawParticles(color(255, 0, 0), 2);
-  particleFilter.drawRectangle(color(255, 0, 0), 2, 30, 30);
+  particleFilterRed.update(noBackgroundImage);
+  particleFilterRed.drawParticles(color(255, 0, 0), 2);
+  particleFilterRed.drawRectangle(color(255, 0, 0), 2, 30, 30);
+
+  particleFilterYellow.update(noBackgroundImage);
+  particleFilterYellow.drawParticles(color(255, 0, 0), 2);
+  particleFilterYellow.drawRectangle(color(255, 0, 0), 2, 30, 30);
 
   // Draw lightsaber
-  if (particleFilter.isConvergent(60)) {
-    int[] userList = kinect.getUsers();
-    
-    for (int i=0; i<userList.length; i++) {
-      if (kinect.isTrackingSkeleton(userList[i])) {
-        Particle average = particleFilter.measure();
+  int[] userList = kinect.getUsers();
+  for (int i=0; i<userList.length; i++) {
+    if (kinect.isTrackingSkeleton(userList[i])) {
+      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_RIGHT_HAND, jointPos3D);
+      kinect.drawLimb(userList[i], SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
+      kinect.convertRealWorldToProjective(jointPos3D, jointPos2D);
 
-        kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_RIGHT_HAND, jointPos3D);
-        kinect.drawLimb(userList[i], SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
-        kinect.convertRealWorldToProjective(jointPos3D, jointPos2D);
+      // Draw about user 1
+      if (particleFilterYellow.isConvergent(60) && userList[i] == 1) {  
+        Particle average = particleFilterYellow.measure();
 
         Line saberLine = new Line(
-          new PVector(jointPos2D.x, jointPos2D.y), 
-          new PVector(average.x, average.y)
+          new PVector(average.x, average.y), 
+          new PVector(jointPos2D.x, jointPos2D.y)
+        );
+
+        pushMatrix();
+        translate((saberLine.start.x + saberLine.end.x) / 2, (saberLine.start.y + saberLine.end.y) / 2);
+        rotate((float) saberLine.radian);
+        imageMode(CENTER);
+        PImage lightSaber = loadImage("lightsaber_red.png");
+        lightSaber.resize((int) saberLine.length, 0);
+        image(lightSaber, 0, 0);
+        imageMode(CORNER);
+        translate(-(saberLine.start.x + saberLine.end.x) / 2, -(saberLine.start.y + saberLine.end.y) / 2);
+        popMatrix();
+
+        println(average.x);
+        println(average.y);
+      }
+      
+      // Draw about user 2
+      if (particleFilterRed.isConvergent(60) && userList[i] == 2) {  
+        Particle average = particleFilterRed.measure();
+
+        Line saberLine = new Line(
+          new PVector(average.x, average.y), 
+          new PVector(jointPos2D.x, jointPos2D.y)
         );
 
         pushMatrix();
@@ -98,10 +127,8 @@ void draw() {
         imageMode(CORNER);
         translate(-(saberLine.start.x + saberLine.end.x) / 2, -(saberLine.start.y + saberLine.end.y) / 2);
         popMatrix();
-
-        println(average.x);
-        println(average.y);
       }
+      
     }
   }
   
@@ -121,4 +148,3 @@ void onLostUser(SimpleOpenNI curContext, int userId) {
 void onVisibleUser(SimpleOpenNI curContext, int userId) {
   println("onVisibleUser - userId: " + userId);
 }
-
