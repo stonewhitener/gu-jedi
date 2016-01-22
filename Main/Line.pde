@@ -7,16 +7,14 @@ final class Line {
   public Line(PVector start, PVector end) {
     this.start = start;
     this.end = end;
+    this.radian = atan2(end.y - start.y, end.x - start.x);
     
     double length = sqrt(pow((end.x - start.x), 2) + pow((end.y - start.y), 2));
-    
-    if (length <= 0) {
-      this.length = 1;
+    if (length < 4) {
+      this.length = 4;
     } else {
       this.length = length;
     }
-    
-    this.radian = atan2((end.x - start.x), (end.y - start.y));
   }
   
   public Line clone() {
