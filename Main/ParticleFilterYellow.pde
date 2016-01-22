@@ -34,9 +34,9 @@ final class ParticleFilterYellow extends AbstractParticleFilter {
 
   private boolean isYellow(color c) {
     return(
-      (hue(c) > 230.0 && hue(c) < 255.0) &&
-      (saturation(c) > 160.0 && saturation(c) < 210.0) && 
-      (brightness(c) > 75.0 && brightness(c) < 100.0)
+      (hue(c) > 30.0 && hue(c) < 40.0) &&
+      (saturation(c) > 150.0 && saturation(c) < 190.0) && 
+      (brightness(c) > 130.0 && brightness(c) < 190.0)
     );
   }
 }

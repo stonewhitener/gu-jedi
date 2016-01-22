@@ -9,9 +9,9 @@ final class Line {
     this.end = end;
     this.radian = atan2(end.y - start.y, end.x - start.x);
     
-    double length = sqrt(pow((end.x - start.x), 2) + pow((end.y - start.y), 2));
-    if (length < 4) {
-      this.length = 4;
+    double length = sqrt(pow(abs((end.x - start.x)), 2) + pow(abs((end.y - start.y)), 2));
+    if (length < 16) {
+      this.length = 16;
     } else {
       this.length = length;
     }
