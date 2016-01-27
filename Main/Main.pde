@@ -4,6 +4,8 @@ final static int WINDOW_HEIGHT = 480;
 final static int IMAGE_WIDTH = 640;
 final static int IMAGE_HEIGHT = 480;
 
+final static double THREATHOLD = 60.0;
+
 // Variables for instances
 Kinect kinect;
 ParticleFilterRed particleFilterRed;
@@ -11,6 +13,9 @@ ParticleFilterYellow particleFilterYellow;
 
 PVector jointPos3D = new PVector();
 PVector jointPos2D = new PVector();
+
+PImage backgroundImage;
+boolean isFirst = true;
 
 void setup() {
   // Set window size
@@ -31,8 +36,11 @@ void setup() {
   kinect.alternativeViewPointDepthToImage();
   
   // Initialize particle filter
-  particleFilterRed = new ParticleFilterRed(500, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
-  particleFilterYellow = new ParticleFilterYellow(500, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
+  particleFilterRed = new ParticleFilterRed(1000, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
+  particleFilterYellow = new ParticleFilterYellow(1000, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
+
+  // Init background image
+  backgroundImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
 
   // Set frame rate
   frameRate(20);
@@ -45,28 +53,55 @@ void draw() {
   kinect.update();
 
   // Images
+  PImage rgbImage = kinect.rgbImage();
   PImage noBackgroundImage = kinect.noBackgroundImage();
   PImage jediImage = loadImage("background.jpg");
 
+  // Create background image
+  if (isFirst) {
+    for (int y = 0; y < IMAGE_WIDTH; y++) {
+      for (int x = 0; x < IMAGE_HEIGHT; x++) {
+        backgroundImage.set(x, y, rgbImage.get(x, y));
+      }
+    }
+    
+    isFirst = false;
+  }
+
+  // Draw users
   kinect.drawUsers(jediImage);
+  
+  // Get diff image
+  PImage diffImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
+  for (int y = 0; y < IMAGE_WIDTH; y++) {
+    for (int x = 0; x < IMAGE_HEIGHT; x++) {
+      color c1 = rgbImage.get(x, y);
+      color c2 = backgroundImage.get(x, y);
+      if (abs(red(c1) - red(c2)) > 32 || abs(green(c1) - green(c2)) > 32 || abs(blue(c1) - blue(c2)) > 32) {
+        diffImage.set(x, y, c1);
+      } else {
+        diffImage.set(x, y, color(0, 0, 0));
+      }
+    }
+  }
 
   // Main Display
   image(jediImage, 0, 0, 640, 480);
 
   // Sub Display
-//  image(, 640, 0, 320, 240);
+  image(diffImage, 640, 0, 320, 240);
 //  image(, 640, 240, 320, 240);
 //  image(, 960, 0, 320, 240);
 //  image(, 960, 240, 320, 480);
 
-  // Update particles
-  particleFilterRed.update(noBackgroundImage);
-  particleFilterRed.drawParticles(color(255, 0, 0), 2);
-  particleFilterRed.drawRectangle(color(255, 0, 0), 2, 30, 30);
 
-  particleFilterYellow.update(noBackgroundImage);
+  // Update particles
+  particleFilterRed.update(diffImage);
+  particleFilterRed.drawParticles(color(255, 0, 0), 2);
+
+  particleFilterYellow.update(diffImage);
   particleFilterYellow.drawParticles(color(255, 0, 0), 2);
-  particleFilterYellow.drawRectangle(color(255, 0, 0), 2, 30, 30);
+  
 
   // Draw lightsaber
   int[] userList = kinect.getUsers();

@@ -3,7 +3,7 @@ import java.util.*;
 abstract class AbstractParticleFilter {
   private List<Particle> particles;
   private Random random;
-  private double variance;
+  public double variance;
   
   private AbstractParticleFilter(int n, double variance) {
     this.particles = new ArrayList<Particle>();
@@ -182,13 +182,13 @@ abstract class AbstractParticleFilter {
   }
   
   public boolean isConvergent(double threshold) {
-    double d=0.0;
+    double d = 0.0;
     Particle average = measure();
     
     for(int i = 0; i < particles.size(); i++) {
       d += sqrt(
         pow(particles.get(i).x - average.x, 2)
-        +pow(particles.get(i).y - average.y, 2)
+        + pow(particles.get(i).y - average.y, 2)
       );
     }
     
