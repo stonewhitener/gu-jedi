@@ -8,14 +8,17 @@ final static double THREATHOLD = 60.0;
 
 // Variables for instances
 Kinect kinect;
-ParticleFilterYellow particleFilterYellow;
-ParticleFilterGReeeeN particleFilterGReeeeN;
 
-PVector jointPos3D = new PVector();
-PVector jointPos2D = new PVector();
+// Elbow and hand's position vectors
+PVector rightElbow3d = new PVector();
+PVector rightElbow2d = new PVector();
+PVector rightHand3d = new PVector();
+PVector rightHand2d = new PVector();
+PVector leftElbow3d = new PVector();
+PVector leftElbow2d = new PVector();
+PVector leftHand3d = new PVector();
+PVector leftHand2d = new PVector();
 
-PImage backgroundImage;
-boolean isFirst = true;
 
 void setup() {
   // Set window size
@@ -35,16 +38,6 @@ void setup() {
   kinect.enableUser();
   kinect.alternativeViewPointDepthToImage();
   
-  // Initialize particle filter
-  particleFilterYellow = new ParticleFilterYellow(1000, 120.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
-  particleFilterGReeeeN = new ParticleFilterGReeeeN(1000, 120.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
-  
-  // Init background image
-  backgroundImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
-
-  // Set frame rate
-//  frameRate(20);
-
   // Set background color black
   background(0);
 }
@@ -57,90 +50,44 @@ void draw() {
   PImage noBackgroundImage = kinect.noBackgroundImage();
   PImage jediImage = loadImage("background.jpg");
 
-//  // Create background image
-//  if (isFirst) {
-//    for (int y = 0; y < IMAGE_WIDTH; y++) {
-//      for (int x = 0; x < IMAGE_HEIGHT; x++) {
-//        backgroundImage.set(x, y, rgbImage.get(x, y));
-//      }
-//    }
-//    
-//    isFirst = false;
-//  }
-
   // Draw users
   kinect.drawUsers(jediImage);
-  
-  // Get diff image
-//  PImage diffImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
-//  for (int y = 0; y < IMAGE_WIDTH; y++) {
-//    for (int x = 0; x < IMAGE_HEIGHT; x++) {
-//      color c1 = rgbImage.get(x, y);
-//      color c2 = backgroundImage.get(x, y);
-//      if (abs(red(c1) - red(c2)) > 32 || abs(green(c1) - green(c2)) > 32 || abs(blue(c1) - blue(c2)) > 32) {
-//        diffImage.set(x, y, c1);
-//      } else {
-//        diffImage.set(x, y, color(0, 0, 0));
-//      }
-//    }
-//  }
 
   // Main Display
-  image(rgbImage, 0, 0, 640, 480);
-
+  image(jediImage, 0, 0, 640, 480);
+  
   // Sub Display
 //  image(, 640, 0, 320, 240);
 //  image(, 640, 240, 320, 240);
 //  image(, 960, 0, 320, 240);
 //  image(, 960, 240, 320, 480);
 
-
-  // Update particles
-  particleFilterYellow.update(rgbImage);
-  particleFilterYellow.drawParticles(color(255, 0, 0), 2);
   
-  particleFilterGReeeeN.update(rgbImage);
-  particleFilterGReeeeN.drawParticles(color(0, 255, 0), 2);
-  
-
-  // Update particle filter's variance
-  Particle pYellow = particleFilterYellow.measure();
-  double likelihoodYellow = particleFilterYellow.likelihood(pYellow.x, pYellow.y, rgbImage);
-//  println(likelihoodYellow);
-  if (likelihoodYellow > 230) {
-    println("Yellow is convergent.");
-    particleFilterYellow.variance = 13.0;
-  } else {
-    println("Yellow is not convergent");
-    particleFilterYellow.variance = 80.0;
-  }
-  
-  Particle pGReeeeN = particleFilterGReeeeN.measure();
-  double likelihoodGReeeeN = particleFilterGReeeeN.likelihood(pGReeeeN.x, pGReeeeN.y, rgbImage);
-//  println(likelihoodGReeeeN);
-  if (likelihoodGReeeeN > 200) {
-    println("GReeeeN is convergent.");
-    particleFilterGReeeeN.variance = 13.0;
-  } else {
-    println("GReeeeN is not convergent");
-    particleFilterGReeeeN.variance = 80.0;
-  }
 
   // Draw lightsaber
   int[] userList = kinect.getUsers();
   for (int i=0; i<userList.length; i++) {
     if (kinect.isTrackingSkeleton(userList[i])) {
-      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_RIGHT_HAND, jointPos3D);
-      kinect.drawLimb(userList[i], SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
-      kinect.convertRealWorldToProjective(jointPos3D, jointPos2D);
+      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_LEFT_ELBOW, leftElbow3d);
+      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_LEFT_HAND, leftHand3d);
+      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_RIGHT_ELBOW, rightElbow3d);
+      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_RIGHT_HAND, rightHand3d);
+      kinect.convertRealWorldToProjective(leftElbow3d, leftElbow2d);
+      kinect.convertRealWorldToProjective(leftHand3d, leftHand2d);
+      kinect.convertRealWorldToProjective(rightElbow3d, rightElbow2d);
+      kinect.convertRealWorldToProjective(rightHand3d, rightHand2d);
 
       // Draw about user 1
-      if (particleFilterYellow.isConvergent(60.0) && userList[i] == 1) {
-        Particle average = particleFilterYellow.measure();
-
+      if (userList[i] == 1) {
         Line saberLine = new Line(
-          new PVector(jointPos2D.x, jointPos2D.y),
-          new PVector(average.x, average.y)
+          new PVector(
+            rightHand2d.x - (rightHand2d.x - rightElbow2d.x) * 0.5, 
+            rightHand2d.y - (rightHand2d.y - rightElbow2d.y) * 0.5
+          ),
+          new PVector(
+            rightHand2d.x + (rightHand2d.x - rightElbow2d.x) * 4.0,
+            rightHand2d.y + (rightHand2d.y - rightElbow2d.y) * 4.0
+          )
         );
 
         pushMatrix();
@@ -153,15 +100,42 @@ void draw() {
         imageMode(CORNER);
         translate(-(saberLine.start.x + saberLine.end.x) / 2, -(saberLine.start.y + saberLine.end.y) / 2);
         popMatrix();
+        
+        
+        saberLine = new Line(
+          new PVector(
+            leftHand2d.x - (leftHand2d.x - leftElbow2d.x) * 0.5, 
+            leftHand2d.y - (leftHand2d.y - leftElbow2d.y) * 0.5
+          ),
+          new PVector(
+            leftHand2d.x + (leftHand2d.x - leftElbow2d.x) * 4.0,
+            leftHand2d.y + (leftHand2d.y - leftElbow2d.y) * 4.0
+          )
+        );
+
+        pushMatrix();
+        translate((saberLine.start.x + saberLine.end.x) / 2, (saberLine.start.y + saberLine.end.y) / 2);
+        rotate((float) saberLine.radian);
+        imageMode(CENTER);
+        lightSaber = loadImage("lightsaber_red.png");
+        lightSaber.resize((int) saberLine.length, 0);
+        image(lightSaber, 0, 0);
+        imageMode(CORNER);
+        translate(-(saberLine.start.x + saberLine.end.x) / 2, -(saberLine.start.y + saberLine.end.y) / 2);
+        popMatrix();
       }
       
       // Draw about user 2
-      if (particleFilterGReeeeN.isConvergent(60.0) && userList[i] == 2) {
-        Particle average = particleFilterGReeeeN.measure();
-
+      else if (userList[i] == 2) {
         Line saberLine = new Line(
-          new PVector(jointPos2D.x, jointPos2D.y),
-          new PVector(average.x, average.y)
+          new PVector(
+            rightHand2d.x - (rightHand2d.x - rightElbow2d.x) * 0.5, 
+            rightHand2d.y - (rightHand2d.y - rightElbow2d.y) * 0.5
+          ),
+          new PVector(
+            rightHand2d.x + (rightHand2d.x - rightElbow2d.x) * 4.0,
+            rightHand2d.y + (rightHand2d.y - rightElbow2d.y) * 4.0
+          )
         );
 
         pushMatrix();
