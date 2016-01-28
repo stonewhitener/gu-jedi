@@ -148,9 +148,9 @@ abstract class AbstractParticleFilter {
       //println("p[" + i + "] = (" + particles[i].x + ", " + particles[i].y + ")");
       //----------------------------------------------------------------
     }
-    for (int i = 500; i < particles.length; i++) {
-      double vx = (random.nextDouble() * 2 - 1) * variance;
-      double vy = (random.nextDouble() * 2 - 1) * variance;
+    for (int i = particles.length - NUM_SPECTATORS; i < particles.length; i++) {
+      double vx = (random.nextDouble() * 2.0 - 1.0) * variance;
+      double vy = (random.nextDouble() * 2.0 - 1.0) * variance;
       //----------------------------------------------------------------
       //println("v[" + i + "] = (" + (int) vx + ", " + (int) vy + ")");
       //----------------------------------------------------------------
@@ -209,14 +209,14 @@ abstract class AbstractParticleFilter {
     double d = 0.0;
     Particle average = measure();
     
-    for(int i = 0; i < particles.length + NUM_SPECTATORS; i++) {
+    for(int i = 0; i < particles.length - NUM_SPECTATORS; i++) {
       d += sqrt(
         pow(particles[i].x - average.x, 2)
         + pow(particles[i].y - average.y, 2)
       );
     }
     
-    d = d / (particles.length + NUM_SPECTATORS);
+    d = d / (particles.length - NUM_SPECTATORS);
     
     if (d < threshold) {
       return true;
