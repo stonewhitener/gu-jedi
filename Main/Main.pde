@@ -8,8 +8,8 @@ final static double THREATHOLD = 60.0;
 
 // Variables for instances
 Kinect kinect;
-ParticleFilterRed particleFilterRed;
 ParticleFilterYellow particleFilterYellow;
+ParticleFilterGReeeeN particleFilterGReeeeN;
 
 PVector jointPos3D = new PVector();
 PVector jointPos2D = new PVector();
@@ -36,14 +36,14 @@ void setup() {
   kinect.alternativeViewPointDepthToImage();
   
   // Initialize particle filter
-  particleFilterRed = new ParticleFilterRed(1000, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
-  particleFilterYellow = new ParticleFilterYellow(1000, 13.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
-
+  particleFilterYellow = new ParticleFilterYellow(1000, 120.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
+  particleFilterGReeeeN = new ParticleFilterGReeeeN(1000, 120.0, IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
+  
   // Init background image
   backgroundImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
 
   // Set frame rate
-  frameRate(20);
+//  frameRate(20);
 
   // Set background color black
   background(0);
@@ -57,51 +57,74 @@ void draw() {
   PImage noBackgroundImage = kinect.noBackgroundImage();
   PImage jediImage = loadImage("background.jpg");
 
-  // Create background image
-  if (isFirst) {
-    for (int y = 0; y < IMAGE_WIDTH; y++) {
-      for (int x = 0; x < IMAGE_HEIGHT; x++) {
-        backgroundImage.set(x, y, rgbImage.get(x, y));
-      }
-    }
-    
-    isFirst = false;
-  }
+//  // Create background image
+//  if (isFirst) {
+//    for (int y = 0; y < IMAGE_WIDTH; y++) {
+//      for (int x = 0; x < IMAGE_HEIGHT; x++) {
+//        backgroundImage.set(x, y, rgbImage.get(x, y));
+//      }
+//    }
+//    
+//    isFirst = false;
+//  }
 
   // Draw users
   kinect.drawUsers(jediImage);
   
   // Get diff image
-  PImage diffImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
-  for (int y = 0; y < IMAGE_WIDTH; y++) {
-    for (int x = 0; x < IMAGE_HEIGHT; x++) {
-      color c1 = rgbImage.get(x, y);
-      color c2 = backgroundImage.get(x, y);
-      if (abs(red(c1) - red(c2)) > 32 || abs(green(c1) - green(c2)) > 32 || abs(blue(c1) - blue(c2)) > 32) {
-        diffImage.set(x, y, c1);
-      } else {
-        diffImage.set(x, y, color(0, 0, 0));
-      }
-    }
-  }
+//  PImage diffImage = createImage(IMAGE_WIDTH, IMAGE_HEIGHT, RGB);
+//  for (int y = 0; y < IMAGE_WIDTH; y++) {
+//    for (int x = 0; x < IMAGE_HEIGHT; x++) {
+//      color c1 = rgbImage.get(x, y);
+//      color c2 = backgroundImage.get(x, y);
+//      if (abs(red(c1) - red(c2)) > 32 || abs(green(c1) - green(c2)) > 32 || abs(blue(c1) - blue(c2)) > 32) {
+//        diffImage.set(x, y, c1);
+//      } else {
+//        diffImage.set(x, y, color(0, 0, 0));
+//      }
+//    }
+//  }
 
   // Main Display
-  image(jediImage, 0, 0, 640, 480);
+  image(rgbImage, 0, 0, 640, 480);
 
   // Sub Display
-  image(diffImage, 640, 0, 320, 240);
+//  image(, 640, 0, 320, 240);
 //  image(, 640, 240, 320, 240);
 //  image(, 960, 0, 320, 240);
 //  image(, 960, 240, 320, 480);
 
 
   // Update particles
-  particleFilterRed.update(diffImage);
-  particleFilterRed.drawParticles(color(255, 0, 0), 2);
-
-  particleFilterYellow.update(diffImage);
-  particleFilterYellow.drawParticles(color(255, 0, 0), 2);
+  particleFilterYellow.update(rgbImage);
+//  particleFilterYellow.drawParticles(color(255, 0, 0), 2);
   
+  particleFilterGReeeeN.update(rgbImage);
+  particleFilterGReeeeN.drawParticles(color(0, 255, 0), 2);
+  
+
+  // Update particle filter's variance
+  Particle pYellow = particleFilterYellow.measure();
+  double likelihoodYellow = particleFilterYellow.likelihood(pYellow.x, pYellow.y, rgbImage);
+//  println(likelihoodYellow);
+  if (likelihoodYellow > 230) {
+//    println("Yellow is convergent.");
+    particleFilterYellow.variance = 13.0;
+  } else {
+//    println("Yellow is not convergent");
+    particleFilterYellow.variance = 80.0;
+  }
+  
+  Particle pGReeeeN = particleFilterGReeeeN.measure();
+  double likelihoodGReeeeN = particleFilterYellow.likelihood(pGReeeeN.x, pGReeeeN.y, rgbImage);
+  println(likelihoodGReeeeN);
+  if (likelihoodGReeeeN > 200) {
+    println("GReeeeN is convergent.");
+    particleFilterGReeeeN.variance = 13.0;
+  } else {
+    println("GReeeeN is not convergent");
+    particleFilterGReeeeN.variance = 80.0;
+  }
 
   // Draw lightsaber
   int[] userList = kinect.getUsers();
@@ -112,7 +135,7 @@ void draw() {
       kinect.convertRealWorldToProjective(jointPos3D, jointPos2D);
 
       // Draw about user 1
-      if (particleFilterYellow.isConvergent(60) && userList[i] == 1) {  
+      if (particleFilterYellow.isConvergent(60) && userList[i] == 1) {
         Particle average = particleFilterYellow.measure();
 
         Line saberLine = new Line(
@@ -130,14 +153,11 @@ void draw() {
         imageMode(CORNER);
         translate(-(saberLine.start.x + saberLine.end.x) / 2, -(saberLine.start.y + saberLine.end.y) / 2);
         popMatrix();
-
-        println(average.x);
-        println(average.y);
       }
       
       // Draw about user 2
-      if (particleFilterRed.isConvergent(60) && userList[i] == 2) {  
-        Particle average = particleFilterRed.measure();
+      if (particleFilterGReeeeN.isConvergent(60) && userList[i] == 2) {
+        Particle average = particleFilterGReeeeN.measure();
 
         Line saberLine = new Line(
           new PVector(jointPos2D.x, jointPos2D.y),
@@ -159,7 +179,10 @@ void draw() {
     }
   }
   
+
+
 }
+
 
 void onNewUser(SimpleOpenNI curContext, int userId) {
   println("onNewUser - userId: " + userId);

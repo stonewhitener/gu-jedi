@@ -5,6 +5,8 @@ abstract class AbstractParticleFilter {
   private Random random;
   public double variance;
   
+  public int NUM_SPECTATORS = 0;
+  
   /**
    * @param n number of particles
    * @param variance variance of gaussian random
@@ -120,9 +122,35 @@ abstract class AbstractParticleFilter {
   }
 
   private void predict(PImage image) {
-    for (int i = 0; i < particles.length; i++) {
+    for (int i = 0; i < particles.length - NUM_SPECTATORS; i++) {
       double vx = random.nextGaussian() * variance;
       double vy = random.nextGaussian() * variance;
+      //----------------------------------------------------------------
+      //println("v[" + i + "] = (" + (int) vx + ", " + (int) vy + ")");
+      //----------------------------------------------------------------
+
+      particles[i].x += (int) vx;
+      particles[i].y += (int) vy;
+
+      if (particles[i].x < 0) {
+        particles[i].x = 0;
+      } else if (particles[i].x > image.width - 1) {
+        particles[i].x = image.width - 1;
+      }
+
+      if (particles[i].y < 0) {
+        particles[i].y = 0;
+      } else if (particles[i].y > image.height - 1) {
+        particles[i].y = image.height - 1;
+      }
+
+      //----------------------------------------------------------------
+      //println("p[" + i + "] = (" + particles[i].x + ", " + particles[i].y + ")");
+      //----------------------------------------------------------------
+    }
+    for (int i = 500; i < particles.length; i++) {
+      double vx = (random.nextDouble() * 2 - 1) * variance;
+      double vy = (random.nextDouble() * 2 - 1) * variance;
       //----------------------------------------------------------------
       //println("v[" + i + "] = (" + (int) vx + ", " + (int) vy + ")");
       //----------------------------------------------------------------
@@ -168,7 +196,7 @@ abstract class AbstractParticleFilter {
     double y = 0.0;
     double weight = 0.0;
 
-    for (int i = 0; i < particles.length; i++) {
+    for (int i = 0; i < particles.length - NUM_SPECTATORS; i++) {
       x += particles[i].x * particles[i].weight;
       y += particles[i].y * particles[i].weight;
       weight += particles[i].weight;
@@ -181,14 +209,14 @@ abstract class AbstractParticleFilter {
     double d = 0.0;
     Particle average = measure();
     
-    for(int i = 0; i < particles.length; i++) {
+    for(int i = 0; i < particles.length + NUM_SPECTATORS; i++) {
       d += sqrt(
         pow(particles[i].x - average.x, 2)
         + pow(particles[i].y - average.y, 2)
       );
     }
     
-    d = d / particles.length;
+    d = d / (particles.length + NUM_SPECTATORS);
     
     if (d < threshold) {
       return true;

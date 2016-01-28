@@ -1,9 +1,9 @@
-final class ParticleFilterYellow extends AbstractParticleFilter {
-  public ParticleFilterYellow(int n, double variance, PImage initImage) {
+final class ParticleFilterGReeeeN extends AbstractParticleFilter {
+  public ParticleFilterGReeeeN(int n, double variance, PImage initImage) {
     super(n, variance, initImage);
   }
-  
-  public ParticleFilterYellow(int n, double variance, int x, int y) {
+
+  public ParticleFilterGReeeeN(int n, double variance, int x, int y) {
     super(n, variance, x, y);
   }
 
@@ -18,17 +18,17 @@ final class ParticleFilterYellow extends AbstractParticleFilter {
     float w_max = 0.0;
     for (int j = y - height / 2; j < y + height / 2; j++) {
       for (int i = x - width / 2; i < x + width / 2; i++) {
-        if (isInImage(i, j, image) && isYellow(image.get(i, j))) {
+        if (isInImage(i, j, image) && isGReeeeN(image.get(i, j))) {
           count++;
           color c = image.get(i, j);
           float d = sqrt(
-            pow(35.0 - hue(c), 2)
-            + pow(168.0 - saturation(c), 2) 
-            + pow(145.0 - brightness(c), 2)
+            pow(100.0 - hue(c), 2)
+            + pow(100.0 - saturation(c), 2) 
+            + pow(128.0 - brightness(c), 2)
           );
-
-          // sqrt((35 - 255)^2 + 168^2 + 145^2) = 313          
-          w[index] = 313.0 - d;
+          
+          // sqrt((100 - 255)^2 + (100 - 255)^2 + (128-255)^2) = 254
+          w[index] = 254.0 - d;
         } else {
           w[index] = 0.0;
         }
@@ -36,7 +36,7 @@ final class ParticleFilterYellow extends AbstractParticleFilter {
         index++;
       }
     }
-    
+
     Arrays.sort(w);
     
     if (count == 0) {
@@ -50,11 +50,11 @@ final class ParticleFilterYellow extends AbstractParticleFilter {
     return (0 <= x && x < (int) image.width && 0 <= y && y < (int) image.height);
   }
 
-  private boolean isYellow(color c) {
+  private boolean isGReeeeN(color c) {
     return(
-      (hue(c) > 30.0 && hue(c) < 45.0) &&
-      (saturation(c) > 80.0 && saturation(c) < 256.0) &&
-      (brightness(c) > 125.0 && brightness(c) < 165.0)
+      (hue(c) > 80.0 && hue(c) < 120.0) &&
+      (saturation(c) > 50.0 && saturation(c) < 150.0) &&
+      (brightness(c) > 85.0 && brightness(c) < 170.0)
     );
   }
 }
