@@ -14,10 +14,10 @@ PVector rightElbow3d = new PVector();
 PVector rightElbow2d = new PVector();
 PVector rightHand3d = new PVector();
 PVector rightHand2d = new PVector();
-PVector leftElbow3d = new PVector();
-PVector leftElbow2d = new PVector();
-PVector leftHand3d = new PVector();
-PVector leftHand2d = new PVector();
+//PVector leftElbow3d = new PVector();
+//PVector leftElbow2d = new PVector();
+//PVector leftHand3d = new PVector();
+//PVector leftHand2d = new PVector();
 
 
 void setup() {
@@ -68,12 +68,12 @@ void draw() {
   int[] userList = kinect.getUsers();
   for (int i=0; i<userList.length; i++) {
     if (kinect.isTrackingSkeleton(userList[i])) {
-      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_LEFT_ELBOW, leftElbow3d);
-      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_LEFT_HAND, leftHand3d);
+//      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_LEFT_ELBOW, leftElbow3d);
+//      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_LEFT_HAND, leftHand3d);
       kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_RIGHT_ELBOW, rightElbow3d);
       kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_RIGHT_HAND, rightHand3d);
-      kinect.convertRealWorldToProjective(leftElbow3d, leftElbow2d);
-      kinect.convertRealWorldToProjective(leftHand3d, leftHand2d);
+//      kinect.convertRealWorldToProjective(leftElbow3d, leftElbow2d);
+//      kinect.convertRealWorldToProjective(leftHand3d, leftHand2d);
       kinect.convertRealWorldToProjective(rightElbow3d, rightElbow2d);
       kinect.convertRealWorldToProjective(rightHand3d, rightHand2d);
 
@@ -95,29 +95,6 @@ void draw() {
         rotate((float) saberLine.radian);
         imageMode(CENTER);
         PImage lightSaber = loadImage("lightsaber_red.png");
-        lightSaber.resize((int) saberLine.length, 0);
-        image(lightSaber, 0, 0);
-        imageMode(CORNER);
-        translate(-(saberLine.start.x + saberLine.end.x) / 2, -(saberLine.start.y + saberLine.end.y) / 2);
-        popMatrix();
-        
-        
-        saberLine = new Line(
-          new PVector(
-            leftHand2d.x - (leftHand2d.x - leftElbow2d.x) * 0.5, 
-            leftHand2d.y - (leftHand2d.y - leftElbow2d.y) * 0.5
-          ),
-          new PVector(
-            leftHand2d.x + (leftHand2d.x - leftElbow2d.x) * 4.0,
-            leftHand2d.y + (leftHand2d.y - leftElbow2d.y) * 4.0
-          )
-        );
-
-        pushMatrix();
-        translate((saberLine.start.x + saberLine.end.x) / 2, (saberLine.start.y + saberLine.end.y) / 2);
-        rotate((float) saberLine.radian);
-        imageMode(CENTER);
-        lightSaber = loadImage("lightsaber_red.png");
         lightSaber.resize((int) saberLine.length, 0);
         image(lightSaber, 0, 0);
         imageMode(CORNER);
