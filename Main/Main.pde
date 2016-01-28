@@ -57,7 +57,7 @@ void draw() {
   kinect.drawUsers(jediImage);
 
   // Main Display
-  image(rgbImage, 0, 0, 640, 480);
+  image(jediImage, 0, 0, 640, 480);
 
   // Sub Display
   //  image(, 640, 0, 320, 240);
