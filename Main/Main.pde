@@ -78,7 +78,7 @@ void draw() {
       kinect.convertRealWorldToProjective(rightHand3d, rightHand2d);
 
       // Draw about user 1
-      if (userList[i] == 1) {
+      if (userList[i] % 2 == 1) {
         Line saberLine = new Line(
           new PVector(
             rightHand2d.x - (rightHand2d.x - rightElbow2d.x) * 0.5, 
@@ -103,7 +103,7 @@ void draw() {
       }
       
       // Draw about user 2
-      else if (userList[i] == 2) {
+      else if (userList[i] % 2 == 0) {
         Line saberLine = new Line(
           new PVector(
             rightHand2d.x - (rightHand2d.x - rightElbow2d.x) * 0.5, 
