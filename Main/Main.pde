@@ -1,5 +1,5 @@
 // Size
-final static int WINDOW_WIDTH = 1280;
+final static int WINDOW_WIDTH = 640;
 final static int WINDOW_HEIGHT = 480;
 final static int IMAGE_WIDTH = 640;
 final static int IMAGE_HEIGHT = 480;
@@ -97,7 +97,7 @@ void draw() {
 
   // Update particles
   particleFilterYellow.update(rgbImage);
-//  particleFilterYellow.drawParticles(color(255, 0, 0), 2);
+  particleFilterYellow.drawParticles(color(255, 0, 0), 2);
   
   particleFilterGReeeeN.update(rgbImage);
   particleFilterGReeeeN.drawParticles(color(0, 255, 0), 2);
@@ -108,16 +108,16 @@ void draw() {
   double likelihoodYellow = particleFilterYellow.likelihood(pYellow.x, pYellow.y, rgbImage);
 //  println(likelihoodYellow);
   if (likelihoodYellow > 230) {
-//    println("Yellow is convergent.");
+    println("Yellow is convergent.");
     particleFilterYellow.variance = 13.0;
   } else {
-//    println("Yellow is not convergent");
+    println("Yellow is not convergent");
     particleFilterYellow.variance = 80.0;
   }
   
   Particle pGReeeeN = particleFilterGReeeeN.measure();
   double likelihoodGReeeeN = particleFilterGReeeeN.likelihood(pGReeeeN.x, pGReeeeN.y, rgbImage);
-  println(likelihoodGReeeeN);
+//  println(likelihoodGReeeeN);
   if (likelihoodGReeeeN > 200) {
     println("GReeeeN is convergent.");
     particleFilterGReeeeN.variance = 13.0;
@@ -135,7 +135,7 @@ void draw() {
       kinect.convertRealWorldToProjective(jointPos3D, jointPos2D);
 
       // Draw about user 1
-      if (particleFilterYellow.isConvergent(60) && userList[i] == 1) {
+      if (particleFilterYellow.isConvergent(60.0) && userList[i] == 1) {
         Particle average = particleFilterYellow.measure();
 
         Line saberLine = new Line(
@@ -156,7 +156,7 @@ void draw() {
       }
       
       // Draw about user 2
-      if (particleFilterGReeeeN.isConvergent(60) && userList[i] == 2) {
+      if (particleFilterGReeeeN.isConvergent(60.0) && userList[i] == 2) {
         Particle average = particleFilterGReeeeN.measure();
 
         Line saberLine = new Line(
@@ -178,8 +178,6 @@ void draw() {
       
     }
   }
-  
-
 
 }
 
