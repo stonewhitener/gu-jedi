@@ -116,7 +116,7 @@ void draw() {
   }
   
   Particle pGReeeeN = particleFilterGReeeeN.measure();
-  double likelihoodGReeeeN = particleFilterYellow.likelihood(pGReeeeN.x, pGReeeeN.y, rgbImage);
+  double likelihoodGReeeeN = particleFilterGReeeeN.likelihood(pGReeeeN.x, pGReeeeN.y, rgbImage);
   println(likelihoodGReeeeN);
   if (likelihoodGReeeeN > 200) {
     println("GReeeeN is convergent.");
