@@ -1,3 +1,10 @@
+import ddf.minim.spi.*;
+import ddf.minim.signals.*;
+import ddf.minim.*;
+import ddf.minim.analysis.*;
+import ddf.minim.ugens.*;
+import ddf.minim.effects.*;
+
 // Size
 final static int WINDOW_WIDTH = 640;
 final static int WINDOW_HEIGHT = 480;
@@ -8,6 +15,9 @@ final static double THREATHOLD = 60.0;
 
 // Variables for instances
 Kinect kinect;
+Minim minim;
+AudioSample saberWave;
+AudioPlayer theme;
 
 // Elbow and hand's position vectors
 PVector rightElbow3d = new PVector();
@@ -19,6 +29,8 @@ PVector rightHand2d = new PVector();
 //PVector leftHand3d = new PVector();
 //PVector leftHand2d = new PVector();
 
+// Saber angle collector
+float[] saberAngles;
 
 void setup() {
   // Set window size
@@ -37,9 +49,17 @@ void setup() {
   kinect.enableRGB();
   kinect.enableUser();
   kinect.alternativeViewPointDepthToImage();
+//  kinect.setMirror(true);
   
   // Set background color black
   background(0);
+  
+  // Init collector
+  saberAngles = new float[8];
+  
+  minim = new Minim(this);
+  saberWave = minim.loadSample("saberWave.wav");
+  theme = minim.loadFile("theme.mp3");
 }
 
 void draw() {
@@ -62,11 +82,11 @@ void draw() {
 //  image(, 960, 0, 320, 240);
 //  image(, 960, 240, 320, 480);
 
-  
+  Line[] sabers = new Line[2];
 
   // Draw lightsaber
   int[] userList = kinect.getUsers();
-  for (int i=0; i<userList.length; i++) {
+  for (int i = 0; i < userList.length; i++) {
     if (kinect.isTrackingSkeleton(userList[i])) {
 //      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_LEFT_ELBOW, leftElbow3d);
 //      kinect.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_LEFT_HAND, leftHand3d);
@@ -89,6 +109,14 @@ void draw() {
             rightHand2d.y + (rightHand2d.y - rightElbow2d.y) * 4.0
           )
         );
+        
+        println(abs(degrees(saberAngles[i] - (float) saberLine.radian)));
+        if (abs(degrees(saberAngles[i] - (float) saberLine.radian)) > 45.0) {
+          saberWave.trigger();
+          println("detect wave.");
+        }
+        
+        saberAngles[i] = (float) saberLine.radian;
 
         pushMatrix();
         translate((saberLine.start.x + saberLine.end.x) / 2, (saberLine.start.y + saberLine.end.y) / 2);
@@ -114,6 +142,14 @@ void draw() {
             rightHand2d.y + (rightHand2d.y - rightElbow2d.y) * 4.0
           )
         );
+        
+        println(abs(degrees(saberAngles[i] - (float) saberLine.radian)));
+        if (abs(degrees(saberAngles[i] - (float) saberLine.radian)) > 45.0) {
+          saberWave.trigger();
+          println("detect wave.");
+        }
+        
+        saberAngles[i] = (float) saberLine.radian;
 
         pushMatrix();
         translate((saberLine.start.x + saberLine.end.x) / 2, (saberLine.start.y + saberLine.end.y) / 2);
@@ -132,6 +168,23 @@ void draw() {
 
 }
 
+void stop() {
+  saberWave.close();
+  minim.stop();
+  super.stop();
+}
+
+
+void keyPressed() {
+  if (key == ' ') {
+    if (theme.isPlaying()) {
+      theme.pause();
+      theme.rewind();
+    } else {
+      theme.loop();
+    }
+  }
+}
 
 void onNewUser(SimpleOpenNI curContext, int userId) {
   println("onNewUser - userId: " + userId);
